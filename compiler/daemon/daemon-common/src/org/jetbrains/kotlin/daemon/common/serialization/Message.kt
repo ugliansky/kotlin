@@ -106,6 +106,11 @@ sealed class Message {
         @Serializable
         data class Report(val filePath: Path, val owner: String, val name: String, val constType: String) : Message()
     }
+
+    object Appendable {
+        @Serializable
+        data class Append(val string: String) : Message()
+    }
 }
 
 object PathAsStringSerializer : KSerializer<Path> {
