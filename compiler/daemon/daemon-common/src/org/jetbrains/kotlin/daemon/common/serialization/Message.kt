@@ -4,17 +4,27 @@
  */
 
 @file:OptIn(ExperimentalBuildToolsApi::class)
+@file:UseSerializers(PathAsStringSerializer::class)
 
 package org.jetbrains.kotlin.daemon.common.serialization
 
 import kotlinx.serialization.Contextual
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.UseSerializers
+import kotlinx.serialization.descriptors.PrimitiveKind.STRING
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 import org.jetbrains.kotlin.buildtools.api.ExperimentalBuildToolsApi
 import org.jetbrains.kotlin.buildtools.api.trackers.BuildMetricsCollector
 import org.jetbrains.kotlin.buildtools.api.trackers.CompilerLookupTracker
 import org.jetbrains.kotlin.buildtools.api.trackers.IcEvent
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSourceLocation
+import java.nio.file.Path
+import kotlin.io.path.Path
 
 @Serializable
 sealed class Message {
@@ -67,4 +77,41 @@ sealed class Message {
             val throwable: ByteArray? = null
         ) : Message()
     }
+
+    object FileMappingTracker {
+        @Serializable
+        data class RecordSourceFilesToOutputFileMapping(val sourceFilePaths: List<Path>, val outputFilePath: Path) : Message()
+
+        @Serializable
+        data class RecordSourceReferencedByCompilerPlugin(val sourceFilePath: Path) : Message()
+
+        @Serializable
+        data class RecordOutputFileGeneratedForPlugin(val outputFilePath: Path) : Message()
+
+        @Serializable
+        data class RecordSourceFileGeneratedForPlugin(val sourceFilePath: Path) : Message()
+    }
+
+    object EnumWhenTracker {
+        @Serializable
+        data class Report(val whenExpressionFilePath: Path, val enumClassFqName: String) : Message()
+    }
+
+    object ImportTracker {
+        @Serializable
+        data class Report(val filePath: Path, val importedFqName: String) : Message()
+    }
+
+    object InlineConstTracker {
+        @Serializable
+        data class Report(val filePath: Path, val owner: String, val name: String, val constType: String) : Message()
+    }
+}
+
+object PathAsStringSerializer : KSerializer<Path> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("Path", STRING)
+
+    override fun serialize(encoder: Encoder, value: Path): Unit = encoder.encodeString(value.toFile().path)
+
+    override fun deserialize(decoder: Decoder): Path = Path(decoder.decodeString())
 }
