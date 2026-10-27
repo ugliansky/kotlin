@@ -5,6 +5,7 @@
 
 package org.jetbrains.kotlin.fir.analysis.diagnostics
 
+import org.jetbrains.kotlin.KtSourceElement
 import org.jetbrains.kotlin.builtins.functions.FunctionTypeKind
 import org.jetbrains.kotlin.config.LanguageFeature
 import org.jetbrains.kotlin.descriptors.ClassKind
@@ -324,6 +325,25 @@ object FirDiagnosticRenderers {
         // TODO, KT-59811: need a way to tune granuality, e.g., without parameter names in functional types.
         ctx[FirAdaptiveTypeRenderingKey].getValue(t)
     }
+
+    fun renderOptionalSource(s: KtSourceElement?): String? {
+        val text = s?.text?.toString() ?: return null
+        val lines = text.lines()
+        val summary = when {
+            lines.size == 1 -> text
+            else -> lines.first() + " ... " + lines.last().replace("""^\s+""".toRegex(), "")
+        }
+        return when {
+            summary.length < EXPRESSION_RENDERING_LIMIT -> "'${summary.replace("'", "\\'")}'"
+            else -> null
+        }
+    }
+
+    val OPTIONAL_FOR_EXPRESSION = Renderer { s: KtSourceElement? ->
+        renderOptionalSource(s)?.let { " for expression $it" } ?: ""
+    }
+
+    const val EXPRESSION_RENDERING_LIMIT = 30
 
     val RENDER_FQ_NAME_WITH_PREFIX = Renderer { symbol: FirBasedSymbol<*> ->
         when (symbol) {
