@@ -6067,6 +6067,7 @@ private fun KaDiagnosticConverterBuilder.addConversions128() {
     add(FirErrors.NO_VALUE_FOR_PARAMETER) { firDiagnostic ->
         NoValueForParameterImpl(
             firDiagnostic.a,
+            firSymbolBuilder.typeBuilder.buildKtType(firDiagnostic.b),
             firDiagnostic as KtDiagnosticWithSource,
             token,
         )

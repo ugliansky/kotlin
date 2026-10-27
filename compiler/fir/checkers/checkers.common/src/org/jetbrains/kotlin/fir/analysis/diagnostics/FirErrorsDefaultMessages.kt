@@ -1895,7 +1895,7 @@ object FirErrorsDefaultMessages : BaseDiagnosticRendererFactory() {
             STRING,
             SYMBOL,
         )
-        map.put(NO_VALUE_FOR_PARAMETER, "No value passed for parameter ''{0}''.", NAME)
+        map.put(NO_VALUE_FOR_PARAMETER, "No value passed for parameter ''{0}'' of type ''{1}''.", NAME, RENDER_TYPE)
         map.put(TOO_MANY_ARGUMENTS, "Too many arguments for ''{0}''.", SYMBOL)
         map.put(NAMED_PARAMETER_NOT_FOUND, "No parameter with name ''{0}'' found.", TO_STRING)
         map.put(NAME_FOR_AMBIGUOUS_PARAMETER, "Named argument is prohibited for parameter with an ambiguous name.")
