@@ -15,6 +15,7 @@ import org.jetbrains.kotlin.diagnostics.WhenMissingCase
 import org.jetbrains.kotlin.diagnostics.rendering.*
 import org.jetbrains.kotlin.fir.FirModuleData
 import org.jetbrains.kotlin.fir.SessionHolder
+import org.jetbrains.kotlin.fir.analysis.diagnostics.FirAdaptiveTypeRenderingKey.renderTypeParameterOrigin
 import org.jetbrains.kotlin.fir.containingClassLookupTag
 import org.jetbrains.kotlin.fir.declarations.FirDeclaration
 import org.jetbrains.kotlin.fir.declarations.FirEnumEntry
@@ -224,7 +225,7 @@ object FirDiagnosticRenderers {
         when (symbol) {
             is FirCallableSymbol<*> -> symbol.name.asString()
             is FirClassLikeSymbol<*> -> symbol.classId.shortClassName.asString()
-            is FirTypeParameterSymbol -> symbol.name.asString()
+            is FirTypeParameterSymbol -> symbol.name.asString() + buildString { renderTypeParameterOrigin(symbol) }
             else -> return@Renderer "???"
         }
     }
