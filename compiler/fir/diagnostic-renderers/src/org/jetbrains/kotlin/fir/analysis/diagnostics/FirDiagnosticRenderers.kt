@@ -17,8 +17,10 @@ import org.jetbrains.kotlin.fir.FirModuleData
 import org.jetbrains.kotlin.fir.SessionHolder
 import org.jetbrains.kotlin.fir.analysis.diagnostics.FirAdaptiveTypeRenderingKey.renderTypeParameterOrigin
 import org.jetbrains.kotlin.fir.containingClassLookupTag
+import org.jetbrains.kotlin.fir.declarations.FirAnonymousFunction
 import org.jetbrains.kotlin.fir.declarations.FirDeclaration
 import org.jetbrains.kotlin.fir.declarations.FirEnumEntry
+import org.jetbrains.kotlin.fir.declarations.FirFunction
 import org.jetbrains.kotlin.fir.declarations.isJavaOrEnhancement
 import org.jetbrains.kotlin.fir.declarations.utils.*
 import org.jetbrains.kotlin.fir.expressions.FirExpression
@@ -227,6 +229,13 @@ object FirDiagnosticRenderers {
             is FirClassLikeSymbol<*> -> symbol.classId.shortClassName.asString()
             is FirTypeParameterSymbol -> symbol.name.asString() + buildString { renderTypeParameterOrigin(symbol) }
             else -> return@Renderer "???"
+        }
+    }
+
+    val IN_FUNCTION = Renderer { declaration: FirFunction ->
+        when (declaration) {
+            is FirAnonymousFunction -> " in anonymous function"
+            else -> " in function '" + DECLARATION_NAME.render(declaration.symbol) + "'"
         }
     }
 
