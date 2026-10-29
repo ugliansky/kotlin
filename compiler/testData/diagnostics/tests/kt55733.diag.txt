@@ -1,0 +1,5 @@
+/kt55733.kt:5:22: error: Classifier 'typealias Appendable = Appendable' does not have a companion object, so it cannot be used as an expression.
+
+/kt55733.kt:6:25: error: Classifier 'typealias StringBuilder = StringBuilder' does not have a companion object, so it cannot be used as an expression. Did you intend to call 'constructor(): StringBuilder'?
+
+/kt55733.kt:7:21: error: Classifier 'typealias IllegalStateException = IllegalStateException' does not have a companion object, so it cannot be used as an expression. Did you intend to call 'constructor(): IllegalStateException'?
