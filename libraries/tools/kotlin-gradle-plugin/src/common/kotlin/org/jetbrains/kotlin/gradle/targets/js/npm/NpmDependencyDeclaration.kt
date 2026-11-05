@@ -7,9 +7,11 @@
 
 package org.jetbrains.kotlin.gradle.targets.js.npm
 
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.jetbrains.kotlin.gradle.InternalKotlinGradlePluginApi
-import org.jetbrains.kotlin.gradle.npm.KotlinNpmDependency
+import org.jetbrains.kotlin.gradle.npm.internal.KotlinNpmDependency
+import org.jetbrains.kotlin.gradle.npm.encodedVersionSpec
 import org.jetbrains.kotlin.gradle.targets.web.npm.ObsoleteNpmDependencyModel
 import java.io.Serializable
 
@@ -39,12 +41,15 @@ internal fun NpmDependencyDeprecated.toNpmDependencyDeclaration(): NpmDependency
     )
 
 @ObsoleteNpmDependencyModel
-internal fun KotlinNpmDependency.toNpmDependencyDeclaration(): NpmDependencyDeclaration =
-    NpmDependencyDeclaration(
-        scope = this.scope.toDeprecatedScope(),
-        name = this.name,
-        version = this.version,
-    )
+internal fun KotlinNpmDependency.toNpmDependencyDeclaration(): Provider<NpmDependencyDeclaration> {
+    return encodedVersionSpec().map { version ->
+        NpmDependencyDeclaration(
+            scope = this.scope.toDeprecatedScope(),
+            name = this.name,
+            version = version,
+        )
+    }
+}
 
 internal fun KotlinNpmDependency.Scope.toDeprecatedScope(): NpmDependencyScopeDeprecated =
     when (this) {
