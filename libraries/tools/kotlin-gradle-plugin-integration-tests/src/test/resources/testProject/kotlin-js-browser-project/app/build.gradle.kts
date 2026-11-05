@@ -72,7 +72,8 @@ kotlin {
             dependencies {
                 implementation(kotlin("stdlib-js"))
                 implementation(project(":lib"))
-                implementation(npm(projectDir.resolve("src/jsMain/css")))
+                //npm-legacy-configuration-based implementation(npm(projectDir.resolve("src/jsMain/css")))
+                //npm-collector-dsl npm(projectDir.resolve("src/jsMain/css"))
             }
         }
 

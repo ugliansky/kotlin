@@ -12,6 +12,7 @@ import org.gradle.api.tasks.testing.AbstractTestTask
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.gradle.util.GradleVersion
 import org.jetbrains.kotlin.gradle.util.isTeamCityRun
+import org.jetbrains.kotlin.gradle.util.replaceText
 import java.io.PrintWriter
 import java.nio.file.attribute.PosixFilePermission
 import kotlin.io.path.*
@@ -285,3 +286,11 @@ internal fun TestProject.subprojects(firstName: String, vararg names: String): I
 internal fun Iterable<GradleProject>.buildScriptInjection(
     code: GradleProjectBuildScriptInjectionContext.() -> Unit,
 ) = forEach { project -> project.buildScriptInjection(code) }
+
+/**
+ * Uncomments the css npm dependency in the `app` subproject of `kotlin-js-browser-project`
+ * that is prefixed with `//[marker]`.
+ */
+internal fun TestProject.uncommentCssNpmDependency(marker: String) {
+    subProject("app").buildGradleKts.replaceText("//$marker ", "")
+}

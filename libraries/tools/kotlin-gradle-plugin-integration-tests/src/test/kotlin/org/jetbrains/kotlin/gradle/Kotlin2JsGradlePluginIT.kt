@@ -753,6 +753,7 @@ class Kotlin2JsIrGradlePluginIT : KGPBaseTest() {
     @TestMetadata("kotlin-js-browser-project")
     fun testJsIrIncrementalInParallel(gradleVersion: GradleVersion) {
         project("kotlin-js-browser-project", gradleVersion) {
+            uncommentCssNpmDependency("npm-legacy-configuration-based")
             gradleProperties.appendText(
                 """
                 |
@@ -1151,6 +1152,7 @@ class Kotlin2JsIrGradlePluginIT : KGPBaseTest() {
     @TestMetadata("kotlin-js-browser-project")
     fun testWebpackConsiderChangesInDependencies(gradleVersion: GradleVersion) {
         project("kotlin-js-browser-project", gradleVersion) {
+            uncommentCssNpmDependency("npm-legacy-configuration-based")
 
             projectPath.resolve("app/src/jsMain/kotlin/App.kt").modify {
                 it.replace("require(\"css/main.css\")", "")
@@ -1176,6 +1178,7 @@ class Kotlin2JsIrGradlePluginIT : KGPBaseTest() {
     @TestMetadata("kotlin-js-browser-project")
     fun testK1JsIrImplementationDependency(gradleVersion: GradleVersion) {
         project("kotlin-js-browser-project", gradleVersion) {
+            uncommentCssNpmDependency("npm-legacy-configuration-based")
 
             build("assemble")
 
@@ -1285,6 +1288,7 @@ class Kotlin2JsIrGradlePluginIT : KGPBaseTest() {
     @TestMetadata("kotlin-js-browser-project")
     fun testWebpackWorksWithEsModules(gradleVersion: GradleVersion) {
         project("kotlin-js-browser-project", gradleVersion) {
+            uncommentCssNpmDependency("npm-legacy-configuration-based")
             subProject("app").buildGradleKts.modify { originalScript ->
                 buildString {
                     append(originalScript)
@@ -1974,6 +1978,7 @@ class Kotlin2JsIrGradlePluginIT : KGPBaseTest() {
     @TestMetadata("kotlin-js-browser-project")
     fun testBrowserDistribution(gradleVersion: GradleVersion) {
         project("kotlin-js-browser-project", gradleVersion) {
+            uncommentCssNpmDependency("npm-legacy-configuration-based")
 
             build("compileProductionExecutableKotlinJs") {
                 assertTasksExecuted(":app:compileProductionExecutableKotlinJs")
@@ -2067,6 +2072,7 @@ class Kotlin2JsIrGradlePluginIT : KGPBaseTest() {
     @TestMetadata("kotlin-js-browser-project")
     fun testNoUnintendedDevDependencies(gradleVersion: GradleVersion) {
         project("kotlin-js-browser-project", gradleVersion) {
+            uncommentCssNpmDependency("npm-legacy-configuration-based")
 
             build("jsBrowserProductionWebpack") {
                 val appPackageJson = getSubprojectPackageJson(projectName = "kotlin-js-browser", subProject = "app")
@@ -2377,6 +2383,7 @@ class Kotlin2JsIrGradlePluginIT : KGPBaseTest() {
     @TestMetadata("kotlin-js-browser-project")
     fun testJsIrWholeProgram(gradleVersion: GradleVersion) {
         project("kotlin-js-browser-project", gradleVersion) {
+            uncommentCssNpmDependency("npm-legacy-configuration-based")
             gradleProperties.appendText(
                 """
                 |
@@ -2576,6 +2583,7 @@ class Kotlin2JsIrGradlePluginIT : KGPBaseTest() {
     @TestMetadata("kotlin-js-browser-project")
     fun testWebpackSourceMapConfig(gradleVersion: GradleVersion) {
         project("kotlin-js-browser-project", gradleVersion) {
+            uncommentCssNpmDependency("npm-legacy-configuration-based")
             build("assemble") {
                 assertTasksExecuted(":app:jsBrowserProductionWebpack")
 
@@ -2634,6 +2642,7 @@ class Kotlin2JsIrGradlePluginIT : KGPBaseTest() {
     @TestMetadata("kotlin-js-browser-project")
     fun testChangedOutputModuleName(gradleVersion: GradleVersion) {
         project("kotlin-js-browser-project", gradleVersion) {
+            uncommentCssNpmDependency("npm-legacy-configuration-based")
             val moduleName = "hello"
             subProject("app").buildGradleKts.modify {
                 it.replace(
