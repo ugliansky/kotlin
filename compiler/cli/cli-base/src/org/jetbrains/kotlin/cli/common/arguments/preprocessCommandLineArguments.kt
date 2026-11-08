@@ -47,7 +47,7 @@ private fun File.expand(diagnostics: MutableList<ArgumentParseDiagnostic>): List
         diagnostics += ArgumentParseDiagnostic.ArgfileError("Argfile not found: '$absolutePath'.")
         emptyList()
     } catch (e: IOException) {
-        diagnostics += ArgumentParseDiagnostic.ArgfileError("Cannot read argfile '$absolutePath': $e")
+        diagnostics += ArgumentParseDiagnostic.ArgfileError("Error while reading argfile: $e")
         emptyList()
     }
 }
