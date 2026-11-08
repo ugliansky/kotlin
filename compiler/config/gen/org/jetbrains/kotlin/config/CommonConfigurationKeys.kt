@@ -189,7 +189,7 @@ var CompilerConfiguration.useFir: Boolean
     set(value) { put(CommonConfigurationKeys.USE_FIR, value) }
 
 var CompilerConfiguration.parserMode: ParserMode
-    get() = get(CommonConfigurationKeys.PARSER_MODE, ParserMode.Default)
+    get() = get(CommonConfigurationKeys.PARSER_MODE, ParserMode.LightTree)
     set(value) { put(CommonConfigurationKeys.PARSER_MODE, value) }
 
 var CompilerConfiguration.hmppModuleStructure: HmppCliModuleStructure?

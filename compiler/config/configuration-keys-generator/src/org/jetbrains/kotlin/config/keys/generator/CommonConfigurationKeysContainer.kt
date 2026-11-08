@@ -37,7 +37,7 @@ object CommonConfigurationKeysContainer : KeysContainer("org.jetbrains.kotlin.co
     val IMPORT_TRACKER by key<ImportTracker>(throwOnNull = false)
     val METADATA_VERSION by key<BinaryVersion>()
     val USE_FIR by key<Boolean>()
-    val PARSER_MODE by key<ParserMode>(defaultValue = "ParserMode.Default")
+    val PARSER_MODE by key<ParserMode>(defaultValue = "ParserMode.LightTree")
     val HMPP_MODULE_STRUCTURE by key<HmppCliModuleStructure>()
     val METADATA_KLIB by key<Boolean>()
     val USE_FIR_EXTRA_CHECKERS by key<Boolean>()
