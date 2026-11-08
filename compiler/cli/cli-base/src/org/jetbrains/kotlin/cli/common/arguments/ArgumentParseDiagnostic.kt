@@ -95,9 +95,7 @@ sealed class ArgumentParseDiagnostic(val isFatal: Boolean = false) {
 
 private sealed class CliDiagnosticReporterWrapper<T> {
     /**
-     * The [fatal] flag selects which diagnostics to report: `true` reports only the fatal ones, `false` only the non-fatal ones.
-     *
-     * The flag could be dropped entirely (reporting all diagnostics whenever a fatal error is encountered),
+     * The flag [fatal] could be dropped entirely (reporting all diagnostics whenever a fatal error is encountered),
      * but the old behavior is preserved for backward compatibility.
      */
     fun reportDiagnostics(arguments: CommonToolArguments, fatal: Boolean) : T {
