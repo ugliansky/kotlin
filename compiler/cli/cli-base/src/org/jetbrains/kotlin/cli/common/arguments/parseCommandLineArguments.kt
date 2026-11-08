@@ -300,7 +300,11 @@ private fun <A : CommonToolArguments> parsePreprocessedCommandLineArguments(
         }
 
         // TODO(KT-80348): should be replaced with just '=' when `-XXLanguage` would be removed
-        val delimiterIndex = arg.indexOfFirst { it == ':' || it == '=' }
+        val delimiter = when {
+            arg.startsWith("-XXLanguage") -> ':'
+            else -> '='
+        }
+        val delimiterIndex = arg.indexOfFirst { it == delimiter }
 
         val key: String
         val value: String? // `null` means no delimiter; empty means a delimiter with empty string afterwords
