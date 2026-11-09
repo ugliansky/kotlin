@@ -26,13 +26,6 @@ fun HmppCliModuleStructure.getModuleNameForSource(source: String): String? {
     return modules.firstOrNull { source in it.sources }?.name
 }
 
-fun HmppCliModuleStructure.getModuleNameForSourceOSIndependent(source: String): String? {
-    val sourceIndependent = source.replace('\\', '/')
-    return modules.firstOrNull { module ->
-        sourceIndependent in module.sources.map { it.replace('\\', '/') }
-    }?.name
-}
-
 fun HmppCliModuleStructure.isFromCommonModule(source: String): Boolean {
     return modules.indexOfFirst { source in it.sources }.let { it >= 0 && it < modules.size - 1 }
 }

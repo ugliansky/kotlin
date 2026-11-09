@@ -292,7 +292,7 @@ object JvmFrontendPipelinePhase : PipelinePhase<ConfigurationPipelineArtifact, J
                     source in commonSources -> true
                     else -> {
                         val path = source.path ?: return@filter false
-                        hmppModuleStructure?.getModuleNameForSourceOSIndependent(path) != lastHmppModuleName
+                        hmppModuleStructure?.getModuleNameForSource(path) != lastHmppModuleName
                     }
                 }
             }
@@ -314,6 +314,15 @@ object JvmFrontendPipelinePhase : PipelinePhase<ConfigurationPipelineArtifact, J
             return true
         }
         return false
+    }
+
+    // TODO KT-91421: delete this function (use global org.jetbrains.kotlin.config.getModuleNameForSource instead)
+    // Perform "sanitization" around \ and / during creation of HmppCliModuleStructure
+    private fun HmppCliModuleStructure.getModuleNameForSource(source: String): String? {
+        val sourceIndependent = source.replace('\\', '/')
+        return modules.firstOrNull { module ->
+            sourceIndependent in module.sources.map { it.replace('\\', '/') }
+        }?.name
     }
 
     fun createLibraryListForJvm(
