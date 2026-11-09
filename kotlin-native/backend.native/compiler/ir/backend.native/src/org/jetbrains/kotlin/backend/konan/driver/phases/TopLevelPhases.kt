@@ -11,6 +11,7 @@ import org.jetbrains.kotlin.backend.common.lower.RedundantCastsRemoverLowering
 import org.jetbrains.kotlin.backend.common.lower.inline.InlineCallCycleCheckerLowering
 import org.jetbrains.kotlin.backend.common.lower.optimizations.PropertyAccessorInlineLowering
 import org.jetbrains.kotlin.backend.common.phaser.*
+import org.jetbrains.kotlin.backend.common.serialization.friendLibraries
 import org.jetbrains.kotlin.backend.common.serialization.kotlinLibrary
 import org.jetbrains.kotlin.backend.konan.*
 import org.jetbrains.kotlin.backend.konan.driver.BasicNativeBackendPhaseContext
@@ -350,6 +351,7 @@ private fun PhaseEngine<out NativeBackendContext>.splitIntoFragments(
             val dependenciesTracker = DependenciesTrackerImpl(llvmModuleSpecification, config, context, config.librariesToCache.getValue(library))
             val fragment = IrModuleFragmentImpl(input.descriptor)
             fragment.kotlinLibrary = input.kotlinLibrary
+            fragment.friendLibraries = input.friendLibraries
             fragment.files += file
             if (containsStdlib && cacheDeserializationStrategy.containsKFunctionImpl)
                 fragment.files += files.filter { it.isFunctionInterfaceFile }

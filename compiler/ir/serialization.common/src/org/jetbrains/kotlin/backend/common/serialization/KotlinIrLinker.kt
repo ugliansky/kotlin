@@ -36,15 +36,18 @@ import org.jetbrains.kotlin.utils.putToMultiMap
 
 abstract class KotlinIrLinker(
     val symbolTable: SymbolTable,
+    private val friendModules: Map<KotlinLibrary, Collection<KotlinLibrary>>,
     val errorCallback: (String) -> Unit,
     val deserializedSymbolPostProcessor: (IrSymbol, IdSignature, IrFileSymbol) -> IrSymbol = { s, _, _ -> s },
 ) : IrDeserializer {
     constructor(
         configuration: CompilerConfiguration,
         symbolTable: SymbolTable,
+        friendModules: Map<KotlinLibrary, Collection<KotlinLibrary>>,
         deserializedSymbolPostProcessor: (IrSymbol, IdSignature, IrFileSymbol) -> IrSymbol = { s, _, _ -> s },
     ) : this(
         symbolTable,
+        friendModules,
         errorCallback = { configuration.report(PartialLinkageDiagnostics.IR_LINKER_ERROR, it) },
         deserializedSymbolPostProcessor
     )
@@ -332,6 +335,7 @@ abstract class KotlinIrLinker(
     ): IrModuleDeserializer {
         val moduleFragment = IrModuleFragmentImpl(moduleDescriptor)
         moduleFragment.kotlinLibrary = kotlinLibrary
+        moduleFragment.friendLibraries = friendModules[kotlinLibrary]
 
         val deserializer = maybeWrapWithBuiltIn(
             createModuleDeserializer(
@@ -497,3 +501,5 @@ fun interface DeserializationStrategyResolver {
  * for all binary dependencies at once, see `DependencyListForCliModule.Builder`.
  */
 var IrModuleFragment.kotlinLibrary: KotlinLibrary? by irAttribute(copyByDefault = false)
+
+var IrModuleFragment.friendLibraries: Collection<KotlinLibrary>? by irAttribute(copyByDefault = false)
