@@ -160,7 +160,7 @@ object JvmFrontendPipelinePhase : PipelinePhase<ConfigurationPipelineArtifact, J
             isScript = {
                 when (it) {
                     is KtPsiSourceFile -> (it.psiFile as? KtFile)?.isScript() == true
-                    else -> KotlinLightParser.isScript(it)
+                    else -> KotlinLightParser.isParsedAsScript(it)
                 }
             },
             fileBelongsToModule = sources.fileBelongsToModuleForLt,
