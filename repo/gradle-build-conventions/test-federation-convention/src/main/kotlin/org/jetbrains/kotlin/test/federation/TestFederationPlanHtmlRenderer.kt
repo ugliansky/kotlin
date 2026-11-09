@@ -28,7 +28,17 @@ internal class TestFederationPlanHtmlRenderer(
                     <tr><th>Domain</th><th>Test subsets</th><th>Reason</th></tr>
                     ${tableRows()}
                 </table>
-                <h2>What are test subsets?</h2>
+                <details>
+                    <summary><h2>What are test subsets?</h2></summary>
+                    <br/>
+                    The "test subset" is a concept introduced by Test Federation. It's basically a subset of tests selected by a given test task.
+                    <br/>
+                    <br/>
+                    You may think of it as of the 3rd level of the filtering hierarchy:
+                    <br/>
+                    <br/>
+                    <img src="repo/gradle-build-conventions/test-federation-convention/img/test-federation-filtering.png" alt="How Test Federation filters tests">
+                </details>
             </body>
         </html>
         """.trimIndent()
@@ -47,6 +57,13 @@ internal class TestFederationPlanHtmlRenderer(
             code { font-family: monospace; font-size: 0.9em; }
             h2 { font-size: 1.15em; margin: 24px 0 8px; }
             h2:first-child { margin-top: 0; }
+            details { margin: 24px 0 8px; }
+            summary { cursor: pointer; user-select: none; list-style: none; }
+            summary::-webkit-details-marker { display: none; }
+            summary h2 { display: inline; }
+            summary::before { content: '▸'; display: inline-block; margin-right: 6px; transition: transform 0.15s; }
+            details[open] summary::before { transform: rotate(90deg); }
+            img { display: block; max-width: 600px; height: auto; padding: 12px; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; }
             .chip { display: inline-block; padding: 1px 8px; border-radius: 999px; border: 1px solid; font-size: 0.9em; white-space: nowrap; }
             .chip-all-tests { background: var(--all-tests-bg); color: var(--all-tests-fg); border-color: var(--all-tests-border); }
             .chip-smoke-tests { background: var(--smoke-tests-bg); color: var(--smoke-tests-fg); border-color: var(--smoke-tests-border); }
@@ -74,7 +91,7 @@ internal class TestFederationPlanHtmlRenderer(
     private fun tableRows() = buildString {
         plan.entries.forEach { row ->
             val domainName = row.domain.name.escapeHtml()
-            val domain = if (row.isChanged) "<strong>$domainName</strong>*" else domainName
+            val domain = if (row.isChanged) "<strong>$domainName</strong>" else domainName
             val subsets = row.testSubsets.joinToString(" + ") { it.toChipHtml() }
             appendLine("<tr><td>$domain</td><td>$subsets</td><td>${reasonHtml(row.reason)}</td></tr>")
         }
