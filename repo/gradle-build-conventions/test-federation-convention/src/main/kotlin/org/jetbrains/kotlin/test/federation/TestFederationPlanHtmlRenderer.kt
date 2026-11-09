@@ -68,6 +68,37 @@ internal class TestFederationPlanHtmlRenderer(
             .chip-all-tests { background: var(--all-tests-bg); color: var(--all-tests-fg); border-color: var(--all-tests-border); }
             .chip-smoke-tests { background: var(--smoke-tests-bg); color: var(--smoke-tests-fg); border-color: var(--smoke-tests-border); }
             .chip-contract-tests { background: var(--contract-tests-bg); color: var(--contract-tests-fg); border-color: var(--contract-tests-border); }
+            .chip[data-annotation] { position: relative; }
+            .chip[data-annotation]::after {
+                content: attr(data-annotation);
+                position: absolute;
+                bottom: calc(100% + 4px);
+                left: 50%;
+                transform: translateX(-50%);
+                padding: 2px 8px;
+                background: var(--fg);
+                color: var(--bg);
+                border-radius: 6px;
+                font-family: monospace;
+                font-size: 0.9em;
+                white-space: nowrap;
+                opacity: 0;
+                transition: opacity 0.15s;
+                pointer-events: none;
+            }
+            .chip[data-annotation]::before {
+                content: '';
+                position: absolute;
+                bottom: calc(100% - 4px);
+                left: 50%;
+                transform: translateX(-50%);
+                border: 4px solid transparent;
+                border-top-color: var(--fg);
+                opacity: 0;
+                transition: opacity 0.15s;
+                pointer-events: none;
+            }
+            .chip[data-annotation]:hover::after, .chip[data-annotation]:hover::before { opacity: 1; }
         </style>
         """.trimIndent()
 
@@ -104,15 +135,17 @@ internal class TestFederationPlanHtmlRenderer(
 
     private fun TestSubset.toChipHtml(): String = when (this) {
         AllTests -> chipHtml("all-tests", "$ALL_TESTS_EMOJI all tests")
-        SmokeTests -> chipHtml("smoke-tests", "$SMOKE_TESTS_EMOJI smoke tests")
-        else -> contractTestsChipHtml(Domain.entries.first { contractTestsSubsetOf(it) == this }.name)
+        SmokeTests -> chipHtml("smoke-tests", "$SMOKE_TESTS_EMOJI smoke tests", "@MustRunAlways")
+        else -> contractTestsChipHtml(Domain.entries.first { contractTestsSubsetOf(it) == this })
     }
 
-    private fun contractTestsChipHtml(domainName: String): String =
-        chipHtml("contract-tests", "$CONTRACT_TESTS_EMOJI contracts for $domainName")
+    private fun contractTestsChipHtml(domain: Domain): String =
+        chipHtml("contract-tests", "$CONTRACT_TESTS_EMOJI contracts for ${domain.name}", "@MustRunOnChangesIn${domain.name}")
 
-    private fun chipHtml(cssClass: String, content: String): String =
-        "<span class='chip chip-$cssClass'>${content.escapeHtml()}</span>"
+    private fun chipHtml(cssClass: String, content: String, annotationName: String? = null): String {
+        val tooltipAttribute = annotationName?.let { " data-annotation='${it.escapeHtml()}'" }.orEmpty()
+        return "<span class='chip chip-$cssClass'$tooltipAttribute>${content.escapeHtml()}</span>"
+    }
 }
 
 private fun String.escapeHtml(): String =
