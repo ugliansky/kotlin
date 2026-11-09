@@ -7,6 +7,8 @@ package org.jetbrains.kotlin.konan.test.klib
 
 import com.intellij.openapi.util.text.StringUtil.convertLineSeparators
 import org.jetbrains.kotlin.backend.common.signatureIndex
+import org.jetbrains.kotlin.io.propertyList
+import org.jetbrains.kotlin.io.readProperties
 import org.jetbrains.kotlin.cli.common.ExitCode
 import org.jetbrains.kotlin.cli.common.arguments.K2NativeCompilerArguments
 import org.jetbrains.kotlin.cli.common.arguments.cliArgument
@@ -216,20 +218,50 @@ class KlibCliSanityTest : AbstractNativeSimpleTest() {
         doTestIgnoringNonexistentTransitiveDependencyInManifestV2(lastModuleIsCInterop = true)
 
     private fun doTestIgnoringNonexistentTransitiveDependencyInManifestV1(lastModuleIsCInterop: Boolean) {
-        var aKlib: KLIB? = null
+        lateinit var aKlib: KLIB
+        lateinit var bKlib: KLIB
+
+        // Compile `a` and `b` using older 2.4 ABI so `b`'s manifest explicitly records `depends=a`
+        // regardless of the default compiler ABI version.
+        val olderAbiArgs = listOf(
+            "-language-version", "2.4",
+            "-XXLanguage:+ExportKlibToOlderAbiVersion",
+            "-Xskip-library-special-compatibility-checks",
+        )
 
         newSourceModules {
             addRegularModule("a")
             addRegularModule("b") { dependsOn("a") }
+        }.compileToKlibsViaCli(
+            extraCliArgs = olderAbiArgs,
+            customGeneratedKlibsDir = buildDir.resolve("v1-$lastModuleIsCInterop-ab").toPath(),
+        ) { module, successKlib ->
+            when (module.name) {
+                "a" -> aKlib = successKlib.resultingArtifact
+                "b" -> {
+                    val artifact = successKlib.resultingArtifact
+                    bKlib = artifact
+                    val bDepends = artifact.klibFile.resolve("default/manifest").toPath()
+                        .readProperties()
+                        .propertyList(KLIB_PROPERTY_DEPENDS, escapeInQuotes = true)
+                    assertTrue("a" in bDepends)
+                    aKlib.klibFile.deleteRecursively() // remove transitive dependency `a`, so subsequent compilation of `c` would miss it.
+                }
+            }
+        }
+
+        newSourceModules {
+            addRegularModule("b", bKlib.klibFile.toPath())
             if (lastModuleIsCInterop)
                 addCInteropModule("c") { dependsOn("b") }
             else
                 addRegularModule("c") { dependsOn("b") }
-        }.compileToKlibsViaCli { module, successKlib ->
-            when (module.name) {
-                "a" -> aKlib = successKlib.resultingArtifact
-                "b" -> aKlib!!.klibFile.delete() // remove transitive dependency `a`, so subsequent compilation of `c` would miss it.
-                "c" -> successKlib.assertNoKlibLoaderIssues()
+        }.compileToKlibsViaCli(
+            extraCliArgs = if (lastModuleIsCInterop) emptyList() else listOf("-Xskip-prerelease-check"),
+            customGeneratedKlibsDir = buildDir.resolve("v1-$lastModuleIsCInterop-c").toPath(),
+        ) { module, successKlib ->
+            if (module.name == "c") {
+                successKlib.assertNoKlibLoaderIssues()
             }
         }
     }

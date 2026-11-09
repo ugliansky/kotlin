@@ -73,20 +73,18 @@ class FirNativeKlibAbiDumpBeforeInliningSavingHandler(
         val dependencies = cliArtifact.fir2IrOutput.usedLibraries.toList()
         val serializerOutput = serialize(configuration, dependencies, cliArtifact, diagnosticReporter)
 
+        val versions = KotlinLibraryVersioning(
+            compilerVersion = KotlinCompilerVersion.getVersion(),
+            abiVersion = configuration.klibAbiVersionForManifest(),
+            metadataVersion = configuration.metadataVersion(),
+        )
+
         KlibWriter {
             manifest {
                 moduleName(configuration.getNotNull(CommonConfigurationKeys.MODULE_NAME))
-                versions(
-                    KotlinLibraryVersioning(
-                        compilerVersion = KotlinCompilerVersion.getVersion(),
-                        abiVersion = configuration.klibAbiVersionForManifest(),
-                        metadataVersion = configuration.metadataVersion(),
-                    )
-                )
+                versions(versions)
                 platformAndTargets(BuiltInsPlatform.NATIVE, testServices.nativeEnvironmentConfigurator.getNativeTarget(module).name)
-                if (configuration.klibAbiCompatibilityLevel < KlibAbiCompatibilityLevel.LATEST_STABLE) {
-                    legacyNativeDependenciesInManifest(serializerOutput.neededLibraries.map { it.uniqueName })
-                }
+                legacyNativeDependenciesInManifest(serializerOutput.neededLibraries.map { it.uniqueName }, versions.abiVersion)
             }
             includeMetadata(serializerOutput.serializedMetadata)
             includeIr(serializerOutput.serializedIr)
