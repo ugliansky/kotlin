@@ -2500,7 +2500,7 @@ internal object KotlinToolingDiagnostics {
         }
     }
 
-    internal object KotlinCompilerArgumentsRejected : ToolingDiagnosticFactory(ERROR, DiagnosticGroup.Compiler.Error) {
+    internal object KotlinCompilerArgumentsRejected : ToolingDiagnosticFactory(WARNING, DiagnosticGroup.Compiler.Warning) {
         operator fun invoke(rejection: String?, compilerVersion: String, pluginVersion: String) = build {
             title { "Kotlin compiler rejected compiler arguments" }
                 .description {
