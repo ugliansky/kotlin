@@ -28,6 +28,14 @@ class HideSameTypeVar : Base() {
     }
 }
 
+class HideSameTypePrivateSet : Base() {
+    companion {
+        var valProp: Int = 11; private set
+        var varProp: Int = 22; private set
+        var propWithPrivateSetter: Int = 33; private set
+    }
+}
+
 class HideDifferentTypeVal : Base() {
     companion {
         val valProp: String = "a"
@@ -44,6 +52,14 @@ class HideDifferentTypeVar : Base() {
     }
 }
 
+class HideDifferentTypePrivateSet : Base() {
+    companion {
+        var valProp: String = "a"; private set
+        var varProp: String = "b"; private set
+        var propWithPrivateSetter: String = "c"; private set
+    }
+}
+
 fun box(): String {
     assertEquals(1, Base.valProp)
     assertEquals(2, Base.varProp)
@@ -57,12 +73,21 @@ fun box(): String {
     assertEquals(22, HideSameTypeVar.varProp)
     assertEquals(33, HideSameTypeVar.propWithPrivateSetter)
 
+    assertEquals(11, HideSameTypePrivateSet.valProp)
+    assertEquals(22, HideSameTypePrivateSet.varProp)
+    assertEquals(33, HideSameTypePrivateSet.propWithPrivateSetter)
+
     assertEquals("a", HideDifferentTypeVal.valProp)
+    assertEquals("b", HideDifferentTypeVal.varProp)
     assertEquals("c", HideDifferentTypeVal.propWithPrivateSetter)
 
     assertEquals("a", HideDifferentTypeVar.valProp)
     assertEquals("b", HideDifferentTypeVar.varProp)
     assertEquals("c", HideDifferentTypeVar.propWithPrivateSetter)
+
+    assertEquals("a", HideDifferentTypePrivateSet.valProp)
+    assertEquals("b", HideDifferentTypePrivateSet.varProp)
+    assertEquals("c", HideDifferentTypePrivateSet.propWithPrivateSetter)
 
     return "OK"
 }
