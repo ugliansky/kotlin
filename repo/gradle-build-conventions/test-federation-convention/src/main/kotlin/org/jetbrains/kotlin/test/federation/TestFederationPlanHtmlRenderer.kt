@@ -5,6 +5,9 @@
 
 package org.jetbrains.kotlin.testFederation
 
+import org.jetbrains.kotlin.testFederation.TestSubset.AllTests
+import org.jetbrains.kotlin.testFederation.TestSubset.SmokeTests
+
 internal class TestFederationPlanHtmlRenderer(
     private val plan: TestFederationPlan
 ) {
@@ -20,18 +23,12 @@ internal class TestFederationPlanHtmlRenderer(
                 ${supportDarkThemeScript()}
             </head>
             <body>
+                <h2>Execution plan</h2>
                 <table>
                     <tr><th>Domain</th><th>Test subsets</th><th>Reason</th></tr>
                     ${tableRows()}
                 </table>
-                <p>Legend:</p>
-                <table>
-                    <tr><th>Symbol</th><th>Meaning</th></tr>
-                    <tr><td><strong>Domain*</strong></td><td>The domain is changed</td></tr>
-                    <tr><td>$ALL_TESTS_EMOJI</td><td>AllTests</td></tr>
-                    <tr><td>$SMOKE_TESTS_EMOJI</td><td>SmokeTests</td></tr>
-                    <tr><td>$CONTRACT_TESTS_EMOJI (Domain)</td><td>ContractTestsForDomain</td></tr>
-                </table>
+                <h2>What are test subsets?</h2>
             </body>
         </html>
         """.trimIndent()
@@ -40,13 +37,20 @@ internal class TestFederationPlanHtmlRenderer(
         // language=HTML
         """
         <style>
-            :root { --fg: #222; --bg: #fff; --border: #ccc; --header-bg: #f0f0f0; color-scheme: light; }
-            :root.dark { --fg: #ddd; --bg: #1e1f22; --border: #4a4d52; --header-bg: #2b2d30; color-scheme: dark; }
-            @media (prefers-color-scheme: dark) { :root:not(.light) { --fg: #ddd; --bg: #1e1f22; --border: #4a4d52; --header-bg: #2b2d30; color-scheme: dark; } }
+            :root { --fg: #222; --bg: #fff; --border: #ccc; --header-bg: #f0f0f0; --all-tests-bg: #dbeafe; --all-tests-fg: #1e40af; --all-tests-border: #93c5fd; --smoke-tests-bg: #ffedd5; --smoke-tests-fg: #9a3412; --smoke-tests-border: #fdba74; --contract-tests-bg: #ede9fe; --contract-tests-fg: #5b21b6; --contract-tests-border: #c4b5fd; color-scheme: light; }
+            :root.dark { --fg: #ddd; --bg: #1e1f22; --border: #4a4d52; --header-bg: #2b2d30; --all-tests-bg: #1c3a5e; --all-tests-fg: #9ec5ff; --all-tests-border: #39588a; --smoke-tests-bg: #43290f; --smoke-tests-fg: #ffb380; --smoke-tests-border: #7c4a1a; --contract-tests-bg: #322358; --contract-tests-fg: #c4b5fd; --contract-tests-border: #4c3a80; color-scheme: dark; }
+            @media (prefers-color-scheme: dark) { :root:not(.light) { --fg: #ddd; --bg: #1e1f22; --border: #4a4d52; --header-bg: #2b2d30; --all-tests-bg: #1c3a5e; --all-tests-fg: #9ec5ff; --all-tests-border: #39588a; --smoke-tests-bg: #43290f; --smoke-tests-fg: #ffb380; --smoke-tests-border: #7c4a1a; --contract-tests-bg: #322358; --contract-tests-fg: #c4b5fd; --contract-tests-border: #4c3a80; color-scheme: dark; } }
             body { font-family: sans-serif; margin: 16px; color: var(--fg); background: var(--bg); }
             table { border-collapse: collapse; }
             th, td { border: 1px solid var(--border); padding: 4px 12px; text-align: left; }
             th { background: var(--header-bg); font-weight: normal; }
+            h2 { font-size: 1.15em; margin: 24px 0 8px; }
+            h2:first-child { margin-top: 0; }
+            img { display: block; max-width: 600px; height: auto; padding: 12px; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; }
+            .chip { display: inline-block; padding: 1px 8px; border-radius: 999px; border: 1px solid; font-size: 0.9em; white-space: nowrap; }
+            .chip-all-tests { background: var(--all-tests-bg); color: var(--all-tests-fg); border-color: var(--all-tests-border); }
+            .chip-smoke-tests { background: var(--smoke-tests-bg); color: var(--smoke-tests-fg); border-color: var(--smoke-tests-border); }
+            .chip-contract-tests { background: var(--contract-tests-bg); color: var(--contract-tests-fg); border-color: var(--contract-tests-border); }
         </style>
         """.trimIndent()
 
@@ -71,10 +75,22 @@ internal class TestFederationPlanHtmlRenderer(
         plan.entries.forEach { row ->
             val domainName = row.domain.name.escapeHtml()
             val domain = if (row.isChanged) "<strong>$domainName</strong>*" else domainName
-            val subsets = row.testSubsets.joinToString(" + ") { it.toEmoji().escapeHtml() }
+            val subsets = row.testSubsets.joinToString(" + ") { it.toChipHtml() }
             appendLine("<tr><td>$domain</td><td>$subsets</td><td>${row.reason.escapeHtml()}</td></tr>")
         }
     }
+
+    private fun TestSubset.toChipHtml(): String = when (this) {
+        AllTests -> chipHtml("all-tests", "$ALL_TESTS_EMOJI all tests")
+        SmokeTests -> chipHtml("smoke-tests", "$SMOKE_TESTS_EMOJI smoke tests")
+        else -> contractTestsChipHtml(Domain.entries.first { contractTestsSubsetOf(it) == this }.name)
+    }
+
+    private fun contractTestsChipHtml(domainName: String): String =
+        chipHtml("contract-tests", "$CONTRACT_TESTS_EMOJI contracts for $domainName")
+
+    private fun chipHtml(cssClass: String, content: String): String =
+        "<span class='chip chip-$cssClass'>${content.escapeHtml()}</span>"
 }
 
 private fun String.escapeHtml(): String =

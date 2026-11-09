@@ -107,12 +107,3 @@ internal class TestFederationPlan private constructor(
 internal const val ALL_TESTS_EMOJI = "🛡️"
 internal const val SMOKE_TESTS_EMOJI = "🔥"
 internal const val CONTRACT_TESTS_EMOJI = "✍️"
-
-internal fun TestSubset.toEmoji(): String = when (this) {
-    AllTests -> ALL_TESTS_EMOJI
-    SmokeTests -> SMOKE_TESTS_EMOJI
-    else -> {
-        val domain = Domain.entries.first { contractTestsSubsetOf(it) == this }
-        "$CONTRACT_TESTS_EMOJI (${domain.name})"
-    }
-}
