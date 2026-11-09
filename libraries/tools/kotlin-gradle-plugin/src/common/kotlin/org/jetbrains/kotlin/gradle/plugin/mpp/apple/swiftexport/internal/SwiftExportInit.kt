@@ -41,6 +41,7 @@ private val swiftExportReservedModuleNames = setOf(
     "KotlinRuntimeSupport",
     "KotlinRuntime",
     "KotlinCoroutineSupport",
+    "KotlinStdlib",
 )
 private val swiftExportModuleNameDelimiters = Regex(SWIFT_EXPORT_MODULE_NAME_DELIMITERS_PATTERN)
 
