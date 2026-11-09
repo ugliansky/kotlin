@@ -44,9 +44,9 @@ internal class TestFederationPlanHtmlRenderer(
             table { border-collapse: collapse; }
             th, td { border: 1px solid var(--border); padding: 4px 12px; text-align: left; }
             th { background: var(--header-bg); font-weight: normal; }
+            code { font-family: monospace; font-size: 0.9em; }
             h2 { font-size: 1.15em; margin: 24px 0 8px; }
             h2:first-child { margin-top: 0; }
-            img { display: block; max-width: 600px; height: auto; padding: 12px; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; }
             .chip { display: inline-block; padding: 1px 8px; border-radius: 999px; border: 1px solid; font-size: 0.9em; white-space: nowrap; }
             .chip-all-tests { background: var(--all-tests-bg); color: var(--all-tests-fg); border-color: var(--all-tests-border); }
             .chip-smoke-tests { background: var(--smoke-tests-bg); color: var(--smoke-tests-fg); border-color: var(--smoke-tests-border); }
@@ -76,8 +76,13 @@ internal class TestFederationPlanHtmlRenderer(
             val domainName = row.domain.name.escapeHtml()
             val domain = if (row.isChanged) "<strong>$domainName</strong>*" else domainName
             val subsets = row.testSubsets.joinToString(" + ") { it.toChipHtml() }
-            appendLine("<tr><td>$domain</td><td>$subsets</td><td>${row.reason.escapeHtml()}</td></tr>")
+            appendLine("<tr><td>$domain</td><td>$subsets</td><td>${reasonHtml(row.reason)}</td></tr>")
         }
+    }
+
+    private fun reasonHtml(reason: String): String {
+        val escapedReason = reason.escapeHtml()
+        return if (reason.startsWith(MUST_RUN_ALL_TESTS_REASON_PREFIX)) "<code>$escapedReason</code>" else escapedReason
     }
 
     private fun TestSubset.toChipHtml(): String = when (this) {
