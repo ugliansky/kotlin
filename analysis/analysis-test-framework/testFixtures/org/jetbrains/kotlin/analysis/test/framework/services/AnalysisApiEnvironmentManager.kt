@@ -53,19 +53,11 @@ class AnalysisApiEnvironmentManagerImpl(
         )
     }
 
-    @OptIn(KtPlatformInterface::class)
     override fun initializeEnvironment() {
         testServices.disposableProvider.registerDisposables(
             projectDisposable = _projectEnvironment.parentDisposable,
             applicationDisposable = _projectEnvironment.environment.parentDisposable,
         )
-        KotlinCoreEnvironment.underApplicationLock {
-            _projectEnvironment.environment.application.apply {
-                if (getServiceIfCreated(BuiltinsVirtualFileProvider::class.java) == null) {
-                    registerService(BuiltinsVirtualFileProvider::class.java, BuiltinsVirtualFileProviderTestImpl())
-                }
-            }
-        }
 
         /**
          * This loading state modification is required to ensure that
@@ -83,6 +75,8 @@ class AnalysisApiEnvironmentManagerImpl(
 
     @OptIn(ExperimentalCompilerApi::class)
     override fun initializeProjectStructure() {
+        installDetachedBuiltinsProvider()
+
         val ktTestModuleStructure = testServices.ktTestModuleStructure
         val useSiteModule = testServices.moduleStructure.modules.first()
         val useSiteCompilerConfiguration =
@@ -102,6 +96,39 @@ class AnalysisApiEnvironmentManagerImpl(
         testServices.compilerConfigurationProvider.registerCompilerExtensions(extensionStorage, useSiteModule, useSiteCompilerConfiguration)
         extensionStorage.registerInProject(project) { "Error during registering compiler extensions: $it" }
         testServices.compilerConfigurationProvider.configureProject(project, useSiteModule, useSiteCompilerConfiguration)
+    }
+
+    /**
+     * Installs the detached test [BuiltinsVirtualFileProvider] as the application service for the fallback
+     * built-ins, in place of the CLI implementation from `analysis-api-standalone-fir.xml`.
+     *
+     * On the test classpath, the built-ins resources sit in the same `kotlin-stdlib` jar that test modules also
+     * depend on as a binary root. The CLI provider resolves the fallback built-ins to a classpath VirtualFile
+     * that then collides with the dependency-mounted one, so the same built-ins file gets decompiled into two
+     * PSI trees, and PSI elements from different trees are mutually invalid. The detached provider serves the
+     * same built-ins content from in-memory files instead, which cannot collide with the mounted jar.
+     *
+     * A plain `registerService` call is not enough here: the XML descriptor registers the CLI implementation
+     * as a service implementation class, and the container keeps constructing it on `getService`, so the
+     * adapter must be unregistered first (the same pattern as the IJPL-237691 workaround in
+     * `FirStandaloneServiceRegistrar`).
+     *
+     * This runs on every test before the modules are indexed: `registerProjectModelServices` reads the
+     * provider to decompile the fallback built-ins, but it runs only after the service registrars have loaded
+     * the XML descriptor, which is why the provider is replaced here and not at environment creation.
+     */
+    @OptIn(KtPlatformInterface::class)
+    private fun installDetachedBuiltinsProvider() {
+        val application = getApplicationEnvironment().application
+        KotlinCoreEnvironment.underApplicationLock {
+            // Idempotent: a single provider per application keeps the detached built-ins files stable across
+            // tests, which lets the application-level KotlinStandaloneIndexCache share them between tests.
+            if (application.getServiceIfCreated(BuiltinsVirtualFileProvider::class.java) is BuiltinsVirtualFileProviderTestImpl) {
+                return@underApplicationLock
+            }
+            application.picoContainer.unregisterComponent(BuiltinsVirtualFileProvider::class.java.name)
+            application.registerService(BuiltinsVirtualFileProvider::class.java, BuiltinsVirtualFileProviderTestImpl())
+        }
     }
 
     override fun getProjectEnvironment(): KotlinCoreProjectEnvironment =
