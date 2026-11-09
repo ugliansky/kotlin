@@ -24,6 +24,10 @@ interface BinaryClassFileIndex {
     /** Returns class files declaring [topLevelClassId], in classpath order. */
     fun findTopLevelClassFiles(topLevelClassId: ClassId): Collection<BinaryClassFileHandle>
 
+    /** Returns class files declaring [topLevelClassId] from roots accepted by [classpath]. */
+    fun findTopLevelClassFiles(topLevelClassId: ClassId, classpath: JvmClasspath): Collection<BinaryClassFileHandle> =
+        findTopLevelClassFiles(topLevelClassId).filter { it in classpath }
+
     /**
      * The file names, without extension, of every class file directly in [packageFqName]. Names
      * containing `$` are returned as is; distinguishing a nested class from a top-level one with a

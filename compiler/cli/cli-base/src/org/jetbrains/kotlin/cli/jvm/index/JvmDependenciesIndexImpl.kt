@@ -23,12 +23,25 @@ class JvmDependenciesIndexImpl(roots: List<JavaRoot>) : JvmDependenciesIndexBase
     override fun findClassVirtualFiles(
         classId: ClassId,
         acceptedExtensions: JavaFileExtensions,
+    ): Collection<VirtualFile> = findClassVirtualFilesWithRootFilter(classId, acceptedExtensions, acceptsRoot = null)
+
+    override fun findClassVirtualFiles(
+        classId: ClassId,
+        acceptedExtensions: JavaFileExtensions,
+        acceptsRoot: (VirtualFile) -> Boolean,
+    ): Collection<VirtualFile> = findClassVirtualFilesWithRootFilter(classId, acceptedExtensions, acceptsRoot)
+
+    private fun findClassVirtualFilesWithRootFilter(
+        classId: ClassId,
+        acceptedExtensions: JavaFileExtensions,
+        acceptsRoot: ((VirtualFile) -> Boolean)?,
     ): Collection<VirtualFile> {
         lock.withLock {
             // TODO: KT-58327 probably should be changed to thread local to fix fast-path
             // make a decision based on information saved from last class search
             val cachedClasses = lastClassVirtualFileSearch?.let { [cachedRequest, cachedResult] ->
                 if (cachedRequest.classId != classId) return@let null
+                if (cachedRequest.acceptsRoot !== acceptsRoot) return@let null
 
                 val isMatchingRequest = if (cachedResult.isEmpty()) {
                     cachedRequest.acceptedExtensions.containsAll(acceptedExtensions)
@@ -44,8 +57,8 @@ class JvmDependenciesIndexImpl(roots: List<JavaRoot>) : JvmDependenciesIndexBase
 
             if (cachedClasses != null) return cachedClasses
 
-            val result = searchClasses(classId, acceptedExtensions)
-            lastClassVirtualFileSearch = ClassSearchRequest(classId, acceptedExtensions) to result
+            val result = searchClasses(classId, acceptedExtensions, acceptsRoot)
+            lastClassVirtualFileSearch = ClassSearchRequest(classId, acceptedExtensions, acceptsRoot) to result
             return result
         }
     }
@@ -58,11 +71,14 @@ class JvmDependenciesIndexImpl(roots: List<JavaRoot>) : JvmDependenciesIndexBase
     private fun searchClasses(
         classId: ClassId,
         acceptedExtensions: JavaFileExtensions,
+        acceptsRoot: ((VirtualFile) -> Boolean)?,
     ): Collection<VirtualFile> {
         val fileNameWithoutExtension = classId.relativeClassName.asString().replace('.', '$')
         val results = mutableListOf<VirtualFile>()
 
         traverseIndex(classId.packageFqName, acceptedExtensions.rootTypes) { directoryInRoot, root ->
+            if (acceptsRoot != null && !acceptsRoot(root.file)) return@traverseIndex true
+
             for (ext in acceptedExtensions) {
                 if (ext.rootType != root.type) continue
 
@@ -88,5 +104,6 @@ class JvmDependenciesIndexImpl(roots: List<JavaRoot>) : JvmDependenciesIndexBase
     private data class ClassSearchRequest(
         val classId: ClassId,
         val acceptedExtensions: JavaFileExtensions,
+        val acceptsRoot: ((VirtualFile) -> Boolean)?,
     )
 }

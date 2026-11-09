@@ -63,6 +63,20 @@ class JvmDependenciesDynamicCompoundIndex(private val shouldOnlyFindFirstClass: 
         }
     }
 
+    override fun findClassVirtualFiles(
+        classId: ClassId,
+        acceptedExtensions: JavaFileExtensions,
+        acceptsRoot: (VirtualFile) -> Boolean,
+    ): Collection<VirtualFile> = lock.read {
+        if (shouldOnlyFindFirstClass) {
+            listOfNotNull(
+                indices.firstNotNullOfOrNull { it.findClassVirtualFiles(classId, acceptedExtensions, acceptsRoot).firstOrNull() }
+            )
+        } else {
+            indices.flatMap { it.findClassVirtualFiles(classId, acceptedExtensions, acceptsRoot) }
+        }
+    }
+
     override fun traverseClassVirtualFilesInPackage(
         packageFqName: FqName,
         acceptedExtensions: JavaFileExtensions,

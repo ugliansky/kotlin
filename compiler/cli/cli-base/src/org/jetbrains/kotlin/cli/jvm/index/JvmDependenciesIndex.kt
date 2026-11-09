@@ -58,6 +58,25 @@ interface JvmDependenciesIndex {
     ): Collection<VirtualFile>
 
     /**
+     * Like [findClassVirtualFiles], but only considers results from roots accepted by [acceptsRoot].
+     *
+     * The default implementation filters the results using [indexedRoots]. Implementations that can search individual roots should
+     * override this method to continue the search when a class in a rejected root is encountered.
+     */
+    fun findClassVirtualFiles(
+        classId: ClassId,
+        acceptedExtensions: JavaFileExtensions,
+        acceptsRoot: (VirtualFile) -> Boolean,
+    ): Collection<VirtualFile> {
+        val acceptedRoots = indexedRoots.map(JavaRoot::file).filter(acceptsRoot).toList()
+        if (acceptedRoots.isEmpty()) return emptyList()
+
+        return findClassVirtualFiles(classId, acceptedExtensions).filter { file ->
+            acceptedRoots.any(file::isInOrUnder)
+        }
+    }
+
+    /**
      * Traverses the index for all *class* [VirtualFile]s contained in directories corresponding to the [packageFqName], and calls
      * [continueSearch] for each class [VirtualFile].
      *
@@ -104,6 +123,15 @@ interface JvmDependenciesIndex {
         acceptedRootTypes: Set<JavaRoot.RootType> = JavaRoot.SourceAndBinary,
         continueSearch: (VirtualFile, JavaRoot.RootType) -> Boolean
     )
+}
+
+private fun VirtualFile.isInOrUnder(root: VirtualFile): Boolean {
+    var file: VirtualFile? = this
+    while (file != null) {
+        if (file == root) return true
+        file = file.parent
+    }
+    return false
 }
 
 data class JavaRoot(val file: VirtualFile, val type: RootType, val prefixFqName: FqName? = null) {

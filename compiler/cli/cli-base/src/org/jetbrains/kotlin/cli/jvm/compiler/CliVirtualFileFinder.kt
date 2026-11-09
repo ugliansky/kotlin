@@ -10,6 +10,7 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet
 import org.jetbrains.kotlin.cli.jvm.index.JavaFileExtension
 import org.jetbrains.kotlin.cli.jvm.index.JavaFileExtensions
 import org.jetbrains.kotlin.cli.jvm.index.JavaRoot
+import org.jetbrains.kotlin.cli.jvm.index.JvmClasspathRootFilter
 import org.jetbrains.kotlin.cli.jvm.index.JvmDependenciesIndex
 import org.jetbrains.kotlin.jvm.environment.JvmClasspath
 import org.jetbrains.kotlin.jvm.environment.containsFile
@@ -31,18 +32,26 @@ private val KOTLIN_METADATA_EXTENSIONS = JavaFileExtensions(JavaFileExtension.KO
  * Compiler code uses the [JvmClasspath] constructor. The file filter is an implementation seam for hosts that select files in
  * their own terms (e.g. Analysis API or K1 adapters over `GlobalSearchScope`); it is not meant to be exposed through compiler APIs.
  */
-class CliVirtualFileFinder(
+class CliVirtualFileFinder private constructor(
     private val index: JvmDependenciesIndex,
     private val accepts: (VirtualFile) -> Boolean,
+    private val acceptsRoot: JvmClasspathRootFilter?,
     private val enableSearchInCtSym: Boolean,
     perfManager: PerformanceManager?,
 ) : VirtualFileFinder(perfManager) {
     constructor(
         index: JvmDependenciesIndex,
+        accepts: (VirtualFile) -> Boolean,
+        enableSearchInCtSym: Boolean,
+        perfManager: PerformanceManager?,
+    ) : this(index, accepts, null, enableSearchInCtSym, perfManager)
+
+    constructor(
+        index: JvmDependenciesIndex,
         classpath: JvmClasspath,
         enableSearchInCtSym: Boolean,
         perfManager: PerformanceManager?,
-    ) : this(index, classpath::containsFile, enableSearchInCtSym, perfManager)
+    ) : this(index, classpath::containsFile, JvmClasspathRootFilter(classpath), enableSearchInCtSym, perfManager)
 
     override fun findVirtualFileWithHeader(classId: ClassId): VirtualFile? =
         findBinaryOrSigClass(classId)
@@ -101,5 +110,9 @@ class CliVirtualFileFinder(
     }
 
     private fun findClass(classId: ClassId, extensions: JavaFileExtensions) =
-        index.findClassVirtualFiles(classId, extensions).firstOrNull(accepts)
+        if (acceptsRoot != null) {
+            index.findClassVirtualFiles(classId, extensions, acceptsRoot).firstOrNull()
+        } else {
+            index.findClassVirtualFiles(classId, extensions).firstOrNull(accepts)
+        }
 }
