@@ -557,8 +557,10 @@ public class ArrayDeque<E> : AbstractMutableList<E> {
 
     @Suppress("NOTHING_TO_OVERRIDE", "NO_EXPLICIT_VISIBILITY_IN_API_MODE") // different visibility inherited from the base class
     override fun <T> toArray(array: Array<T>): Array<T> {
+        val destGeneric = if (array.size >= size) array else arrayOfNulls(array, size)
+
         @Suppress("UNCHECKED_CAST")
-        val dest = (if (array.size >= size) array else arrayOfNulls(array, size)) as Array<Any?>
+        val dest = destGeneric as Array<Any?>
 
         val tail = internalIndex(size)
         if (head < tail) {
