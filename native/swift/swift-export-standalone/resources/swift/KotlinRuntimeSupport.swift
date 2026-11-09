@@ -54,6 +54,7 @@ public protocol SealedType {
 public protocol _KotlinBridgeable {
     init(__externalRCRefUnsafe: UnsafeMutableRawPointer, options: KotlinBaseConstructionOptions)
     func __externalRCRef() -> UnsafeMutableRawPointer
+    func __kotlinBridgeableRef() -> KotlinBridgeableRef
 }
 
 public class _KotlinExistentialPenBox: KotlinBase {
@@ -65,6 +66,10 @@ public class _KotlinExistential<Wrapped>: _KotlinExistentialPenBox {
 }
 
 extension KotlinBase : _KotlinBridgeable {
+    public func __kotlinBridgeableRef() -> KotlinBridgeableRef {
+        let value = KotlinBridgeableValue(ptrValue: KotlinBridgeable_Any_toKotlin(self))
+        return KotlinBridgeableRef(type: KotlinBridgeableTypeObject, value: value)
+    }
 }
 
 // MARK: - _KotlinBridgeable conformances for primitive types
@@ -76,6 +81,10 @@ extension Swift.Int8: KotlinRuntimeSupport._KotlinBridgeable {
     public func __externalRCRef() -> UnsafeMutableRawPointer {
         return KotlinBridgeable_Int8_box(self)
     }
+    public func __kotlinBridgeableRef() -> KotlinBridgeableRef {
+        let value = KotlinBridgeableValue(int8Value: self)
+        return KotlinBridgeableRef(type: KotlinBridgeableTypeInt8, value: value)
+    }
 }
 
 extension Swift.Int16: KotlinRuntimeSupport._KotlinBridgeable {
@@ -84,6 +93,10 @@ extension Swift.Int16: KotlinRuntimeSupport._KotlinBridgeable {
     }
     public func __externalRCRef() -> UnsafeMutableRawPointer {
         return KotlinBridgeable_Int16_box(self)
+    }
+    public func __kotlinBridgeableRef() -> KotlinBridgeableRef {
+        let value = KotlinBridgeableValue(int16Value: self)
+        return KotlinBridgeableRef(type: KotlinBridgeableTypeInt16, value: value)
     }
 }
 
@@ -94,6 +107,10 @@ extension Swift.Int32: KotlinRuntimeSupport._KotlinBridgeable {
     public func __externalRCRef() -> UnsafeMutableRawPointer {
         return KotlinBridgeable_Int32_box(self)
     }
+    public func __kotlinBridgeableRef() -> KotlinBridgeableRef {
+        let value = KotlinBridgeableValue(int32Value: self)
+        return KotlinBridgeableRef(type: KotlinBridgeableTypeInt32, value: value)
+    }
 }
 
 extension Swift.Int64: KotlinRuntimeSupport._KotlinBridgeable {
@@ -102,6 +119,10 @@ extension Swift.Int64: KotlinRuntimeSupport._KotlinBridgeable {
     }
     public func __externalRCRef() -> UnsafeMutableRawPointer {
         return KotlinBridgeable_Int64_box(self)
+    }
+    public func __kotlinBridgeableRef() -> KotlinBridgeableRef {
+        let value = KotlinBridgeableValue(int64Value: self)
+        return KotlinBridgeableRef(type: KotlinBridgeableTypeInt64, value: value)
     }
 }
 
@@ -112,6 +133,10 @@ extension Swift.UInt8: KotlinRuntimeSupport._KotlinBridgeable {
     public func __externalRCRef() -> UnsafeMutableRawPointer {
         return KotlinBridgeable_UInt8_box(self)
     }
+    public func __kotlinBridgeableRef() -> KotlinBridgeableRef {
+        let value = KotlinBridgeableValue(uint8Value: self)
+        return KotlinBridgeableRef(type: KotlinBridgeableTypeUInt8, value: value)
+    }
 }
 
 extension Swift.UInt16: KotlinRuntimeSupport._KotlinBridgeable {
@@ -120,6 +145,10 @@ extension Swift.UInt16: KotlinRuntimeSupport._KotlinBridgeable {
     }
     public func __externalRCRef() -> UnsafeMutableRawPointer {
         return KotlinBridgeable_UInt16_box(self)
+    }
+    public func __kotlinBridgeableRef() -> KotlinBridgeableRef {
+        let value = KotlinBridgeableValue(uint16Value: self)
+        return KotlinBridgeableRef(type: KotlinBridgeableTypeUInt16, value: value)
     }
 }
 
@@ -130,6 +159,10 @@ extension Swift.UInt32: KotlinRuntimeSupport._KotlinBridgeable {
     public func __externalRCRef() -> UnsafeMutableRawPointer {
         return KotlinBridgeable_UInt32_box(self)
     }
+    public func __kotlinBridgeableRef() -> KotlinBridgeableRef {
+        let value = KotlinBridgeableValue(uint32Value: self)
+        return KotlinBridgeableRef(type: KotlinBridgeableTypeUInt32, value: value)
+    }
 }
 
 extension Swift.UInt64: KotlinRuntimeSupport._KotlinBridgeable {
@@ -138,6 +171,10 @@ extension Swift.UInt64: KotlinRuntimeSupport._KotlinBridgeable {
     }
     public func __externalRCRef() -> UnsafeMutableRawPointer {
         return KotlinBridgeable_UInt64_box(self)
+    }
+    public func __kotlinBridgeableRef() -> KotlinBridgeableRef {
+        let value = KotlinBridgeableValue(uint64Value: self)
+        return KotlinBridgeableRef(type: KotlinBridgeableTypeUInt64, value: value)
     }
 }
 
@@ -148,9 +185,9 @@ extension Swift.Bool: KotlinRuntimeSupport._KotlinBridgeable {
     public func __externalRCRef() -> UnsafeMutableRawPointer {
         return KotlinBridgeable_Bool_box(self)
     }
-
     public func __kotlinBridgeableRef() -> KotlinBridgeableRef {
-        return KotlinBridgeableRef(type: KotlinBridgeableTypeBool, value: KotlinBridgeableValue(boolValue: self))
+        let value = KotlinBridgeableValue(boolValue: self)
+        return KotlinBridgeableRef(type: KotlinBridgeableTypeBool, value: value)
     }
 }
 
@@ -161,6 +198,10 @@ extension Swift.Float: KotlinRuntimeSupport._KotlinBridgeable {
     public func __externalRCRef() -> UnsafeMutableRawPointer {
         return KotlinBridgeable_Float_box(self)
     }
+    public func __kotlinBridgeableRef() -> KotlinBridgeableRef {
+        let value = KotlinBridgeableValue(floatValue: self)
+        return KotlinBridgeableRef(type: KotlinBridgeableTypeFloat, value: value)
+    }
 }
 
 extension Swift.Double: KotlinRuntimeSupport._KotlinBridgeable {
@@ -169,6 +210,10 @@ extension Swift.Double: KotlinRuntimeSupport._KotlinBridgeable {
     }
     public func __externalRCRef() -> UnsafeMutableRawPointer {
         return KotlinBridgeable_Double_box(self)
+    }
+    public func __kotlinBridgeableRef() -> KotlinBridgeableRef {
+        let value = KotlinBridgeableValue(doubleValue: self)
+        return KotlinBridgeableRef(type: KotlinBridgeableTypeDouble, value: value)
     }
 }
 
@@ -181,6 +226,10 @@ extension Swift.String: KotlinRuntimeSupport._KotlinBridgeable {
     public func __externalRCRef() -> UnsafeMutableRawPointer {
         return KotlinBridgeable_String_box(self)
     }
+    public func __kotlinBridgeableRef() -> KotlinBridgeableRef {
+        let value = KotlinBridgeableValue(ptrValue: KotlinBridgeable_String_toKotlin(self))
+        return KotlinBridgeableRef(type: KotlinBridgeableTypeString, value: value)
+    }
 }
 
 // MARK: - _KotlinBridgeable conformances for collection types
@@ -192,6 +241,9 @@ extension Swift.Array: KotlinRuntimeSupport._KotlinBridgeable {
     public func __externalRCRef() -> UnsafeMutableRawPointer {
         return KotlinBridgeable_Array_box(self)
     }
+    public func __kotlinBridgeableRef() -> KotlinBridgeableRef {
+        fatalError("impl __kotlinBridgeableRef for Swift collection structs")
+    }
 }
 
 extension Swift.Set: KotlinRuntimeSupport._KotlinBridgeable {
@@ -201,6 +253,9 @@ extension Swift.Set: KotlinRuntimeSupport._KotlinBridgeable {
     public func __externalRCRef() -> UnsafeMutableRawPointer {
         return KotlinBridgeable_Set_box(self)
     }
+    public func __kotlinBridgeableRef() -> KotlinBridgeableRef {
+        fatalError("impl __kotlinBridgeableRef for Swift collection structs")
+    }
 }
 
 extension Swift.Dictionary: KotlinRuntimeSupport._KotlinBridgeable {
@@ -209,6 +264,9 @@ extension Swift.Dictionary: KotlinRuntimeSupport._KotlinBridgeable {
     }
     public func __externalRCRef() -> UnsafeMutableRawPointer {
         return KotlinBridgeable_Dictionary_box(self)
+    }
+    public func __kotlinBridgeableRef() -> KotlinBridgeableRef {
+        fatalError("impl __kotlinBridgeableRef for Swift collection structs")
     }
 }
 
@@ -264,10 +322,45 @@ extension KotlinBase {
         case KotlinBridgeableTypeUInt64: return ref.value.uint64Value
         case KotlinBridgeableTypeDouble: return ref.value.doubleValue
         case KotlinBridgeableTypeFloat: return ref.value.floatValue
-        case KotlinBridgeableTypeString: return ref.value.ptrValue.load(as: String.self)
+        case KotlinBridgeableTypeObject: return KotlinBridgeable_Any_fromKotlin(ref.value.ptrValue)
+        case KotlinBridgeableTypeString: return KotlinBridgeable_String_fromKotlin(ref.value.ptrValue)
         default: fatalError("Unsupported KotlinBridgeableType: \(ref.type)")
         }
     }
+}
+
+package func KotlinBridgeable_Void_toKotlin(_ value: Void) -> Bool {
+    return true
+}
+
+package func KotlinBridgeable_Void_fromKotlin(_ value: Bool) -> Void {
+    return ()
+}
+
+package func KotlinBridgeable_OptVoid_toKotlin(_ value: Void?) -> Bool {
+    return value != nil
+}
+
+package func KotlinBridgeable_OptVoid_fromKotlin(_ value: Bool) -> Void? {
+    return value ? () : nil
+}
+
+package func KotlinBridgeable_Any_toKotlin(_ value: KotlinBase) -> UnsafeMutableRawPointer {
+    return value.__externalRCRef()
+}
+
+package func KotlinBridgeable_Any_fromKotlin(_ value: UnsafeMutableRawPointer) -> KotlinBase {
+    // TODO: Conforms to
+    return KotlinBase.__createProtocolWrapper(externalRCRef: value, conformsTo: nil)
+}
+
+package func KotlinBridgeable_OptAny_toKotlin(_ value: KotlinBase?) -> UnsafeMutableRawPointer? {
+    return value.map { KotlinBridgeable_Any_toKotlin($0) } ?? nil
+}
+
+package func KotlinBridgeable_OptAny_fromKotlin(_ value: UnsafeMutableRawPointer?) -> KotlinBase? {
+    guard let value else { return nil }
+    return KotlinBridgeable_Any_fromKotlin(value)
 }
 
 extension NSObject {

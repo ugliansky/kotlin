@@ -3,6 +3,7 @@
 import kotlinx.cinterop.*
 import kotlin.native.internal.ImportedBridge
 import kotlin.native.internal.ExportedBridge
+import kotlin.native.internal.NativePtr
 import platform.darwin.NSObject
 
 /**
@@ -361,28 +362,136 @@ public class KotlinBridgeableRef(rawPtr: NativePtr) : CStructVar(rawPtr) {
         get() = memberAt(sizeOf<KotlinBridgeableType.Var>())
 }
 
+public fun Nothing?.asKotlinBridgeableRef(): CValue<KotlinBridgeableRef> = cValue {
+    type = KotlinBridgeableType.Nil
+}
+
+public fun Unit.asKotlinBridgeableRef(): CValue<KotlinBridgeableRef> = cValue {
+    type = KotlinBridgeableType.Void
+    value.boolValue = KotlinBridgeable_Void_toSwift(Unit)
+}
+
+public fun Boolean.asKotlinBridgeableRef(): CValue<KotlinBridgeableRef> = cValue {
+    type = KotlinBridgeableType.Bool
+    value.boolValue = this@asKotlinBridgeableRef
+}
+
+public fun Boolean?.asKotlinBridgeableRef(): CValue<KotlinBridgeableRef> =
+    if (this != null) this.asKotlinBridgeableRef() else this.asKotlinBridgeableRef()
+
+public fun Byte.asKotlinBridgeableRef(): CValue<KotlinBridgeableRef> = cValue {
+    type = KotlinBridgeableType.Int8
+    value.int8Value = this@asKotlinBridgeableRef
+}
+
+public fun Byte?.asKotlinBridgeableRef(): CValue<KotlinBridgeableRef> =
+    if (this != null) this.asKotlinBridgeableRef() else this.asKotlinBridgeableRef()
+
+public fun Short.asKotlinBridgeableRef(): CValue<KotlinBridgeableRef> = cValue {
+    type = KotlinBridgeableType.Int16
+    value.int16Value = this@asKotlinBridgeableRef
+}
+
+public fun Short?.asKotlinBridgeableRef(): CValue<KotlinBridgeableRef> =
+    if (this != null) this.asKotlinBridgeableRef() else this.asKotlinBridgeableRef()
+
+public fun Int.asKotlinBridgeableRef(): CValue<KotlinBridgeableRef> = cValue {
+    type = KotlinBridgeableType.Int32
+    value.int32Value = this@asKotlinBridgeableRef
+}
+
+public fun Int?.asKotlinBridgeableRef(): CValue<KotlinBridgeableRef> =
+    if (this != null) this.asKotlinBridgeableRef() else this.asKotlinBridgeableRef()
+
+public fun Long.asKotlinBridgeableRef(): CValue<KotlinBridgeableRef> = cValue {
+    type = KotlinBridgeableType.Int64
+    value.int64Value = this@asKotlinBridgeableRef
+}
+
+public fun Long?.asKotlinBridgeableRef(): CValue<KotlinBridgeableRef> =
+    if (this != null) this.asKotlinBridgeableRef() else this.asKotlinBridgeableRef()
+
+public fun UByte.asKotlinBridgeableRef(): CValue<KotlinBridgeableRef> = cValue {
+    type = KotlinBridgeableType.UInt8
+    value.uint8Value = this@asKotlinBridgeableRef
+}
+
+public fun UByte?.asKotlinBridgeableRef(): CValue<KotlinBridgeableRef> =
+    if (this != null) this.asKotlinBridgeableRef() else this.asKotlinBridgeableRef()
+
+public fun UShort.asKotlinBridgeableRef(): CValue<KotlinBridgeableRef> = cValue {
+    type = KotlinBridgeableType.UInt16
+    value.uint16Value = this@asKotlinBridgeableRef
+}
+
+public fun UShort?.asKotlinBridgeableRef(): CValue<KotlinBridgeableRef> =
+    if (this != null) this.asKotlinBridgeableRef() else this.asKotlinBridgeableRef()
+
+public fun UInt.asKotlinBridgeableRef(): CValue<KotlinBridgeableRef> = cValue {
+    type = KotlinBridgeableType.UInt32
+    value.uint32Value = this@asKotlinBridgeableRef
+}
+
+public fun UInt?.asKotlinBridgeableRef(): CValue<KotlinBridgeableRef> =
+    if (this != null) this.asKotlinBridgeableRef() else this.asKotlinBridgeableRef()
+
+public fun ULong.asKotlinBridgeableRef(): CValue<KotlinBridgeableRef> = cValue {
+    type = KotlinBridgeableType.UInt64
+    value.uint64Value = this@asKotlinBridgeableRef
+}
+
+public fun ULong?.asKotlinBridgeableRef(): CValue<KotlinBridgeableRef> =
+    if (this != null) this.asKotlinBridgeableRef() else this.asKotlinBridgeableRef()
+
+public fun Double.asKotlinBridgeableRef(): CValue<KotlinBridgeableRef> = cValue {
+    type = KotlinBridgeableType.Double
+    value.doubleValue = this@asKotlinBridgeableRef
+}
+
+public fun Double?.asKotlinBridgeableRef(): CValue<KotlinBridgeableRef> =
+    if (this != null) this.asKotlinBridgeableRef() else this.asKotlinBridgeableRef()
+
+public fun Float.asKotlinBridgeableRef(): CValue<KotlinBridgeableRef> = cValue {
+    type = KotlinBridgeableType.Float
+    value.floatValue = this@asKotlinBridgeableRef
+}
+
+public fun Float?.asKotlinBridgeableRef(): CValue<KotlinBridgeableRef> =
+    if (this != null) this.asKotlinBridgeableRef() else this.asKotlinBridgeableRef()
+
+public fun String.asKotlinBridgeableRef(): CValue<KotlinBridgeableRef> = cValue {
+    type = KotlinBridgeableType.String
+    value.ptrValue = interpretCPointer(KotlinBridgeable_String_toSwift(this@asKotlinBridgeableRef))
+}
+
+public fun String?.asKotlinBridgeableRef(): CValue<KotlinBridgeableRef> =
+    if (this != null) this.asKotlinBridgeableRef() else this.asKotlinBridgeableRef()
+
 public fun Any?.asKotlinBridgeableRef(): CValue<KotlinBridgeableRef> = when (this) {
-    null -> cValue {
-        type = KotlinBridgeableType.Nil
+    null -> this.asKotlinBridgeableRef()
+    Unit -> this.asKotlinBridgeableRef()
+    is Boolean -> this.asKotlinBridgeableRef()
+    is Byte -> this.asKotlinBridgeableRef()
+    is Short -> this.asKotlinBridgeableRef()
+    is Int -> this.asKotlinBridgeableRef()
+    is Long -> this.asKotlinBridgeableRef()
+    is UByte -> this.asKotlinBridgeableRef()
+    is UShort -> this.asKotlinBridgeableRef()
+    is UInt -> this.asKotlinBridgeableRef()
+    is ULong -> this.asKotlinBridgeableRef()
+    is Double -> this.asKotlinBridgeableRef()
+    is Float -> this.asKotlinBridgeableRef()
+    is String -> this.asKotlinBridgeableRef()
+    else -> cValue {
+        type = KotlinBridgeableType.Object
+        value.ptrValue = interpretCPointer(KotlinBridgeable_Any_toSwift(this@asKotlinBridgeableRef))
     }
-    Unit -> cValue {
-        type = KotlinBridgeableType.Void
-    }
-    is Boolean -> cValue {
-        type = KotlinBridgeableType.Bool
-        value.boolValue = this@asKotlinBridgeableRef
-    }
-    is String -> cValue {
-        type = KotlinBridgeableType.String
-        value.ptrValue = interpretCPointer(this@asKotlinBridgeableRef.objcPtr())
-    }
-    else -> error("Unsupported KotlinBridgeable value: $this")
 }
 
 public fun CValue<KotlinBridgeableRef>.asAny(): Any? = useContents {
     when (type) {
         KotlinBridgeableType.Nil -> null
-        KotlinBridgeableType.Void -> Unit
+        KotlinBridgeableType.Void -> KotlinBridgeable_Void_fromSwift(value.boolValue)
         KotlinBridgeableType.Bool -> value.boolValue
         KotlinBridgeableType.Int8 -> value.int8Value
         KotlinBridgeableType.Int16 -> value.int16Value
@@ -394,9 +503,53 @@ public fun CValue<KotlinBridgeableRef>.asAny(): Any? = useContents {
         KotlinBridgeableType.UInt64 -> value.uint64Value
         KotlinBridgeableType.Double -> value.doubleValue
         KotlinBridgeableType.Float -> value.floatValue
-        KotlinBridgeableType.Object -> TODO()
-        KotlinBridgeableType.String -> TODO()
+        KotlinBridgeableType.Object -> KotlinBridgeable_Any_fromSwift(value.ptrValue.rawValue)
+        KotlinBridgeableType.String -> KotlinBridgeable_String_fromSwift(value.ptrValue.rawValue)
         KotlinBridgeableType.Error -> TODO()
         KotlinBridgeableType.Native -> TODO()
     }
+}
+
+public fun KotlinBridgeable_Void_toSwift(value: Unit): Boolean = true
+
+public fun KotlinBridgeable_Void_fromSwift(value: Boolean): Unit = Unit
+
+public fun KotlinBridgeable_OptVoid_toSwift(value: Unit?): Boolean =
+    value != null
+
+public fun KotlinBridgeable_OptVoid_fromSwift(value: Boolean): Unit? =
+    if (value) Unit else null
+
+public fun KotlinBridgeable_Any_toSwift(value: Any): NativePtr =
+    kotlin.native.internal.ref.createRetainedExternalRCRef(value)
+
+public fun KotlinBridgeable_Any_fromSwift(value: NativePtr): Any =
+    kotlin.native.internal.ref.dereferenceExternalRCRef(value) as Any
+
+public fun KotlinBridgeable_OptAny_toSwift(value: Any?): NativePtr = when (value) {
+    null -> kotlin.native.internal.NativePtr.NULL
+    else -> KotlinBridgeable_Any_toSwift(value)
+}
+
+public fun KotlinBridgeable_OptAny_fromSwift(value: NativePtr): Any? = when (value) {
+    kotlin.native.internal.NativePtr.NULL -> null
+    else -> KotlinBridgeable_Any_fromSwift(value)
+}
+
+@ExportedBridge("KotlinBridgeable_String_toKotlin")
+public fun KotlinBridgeable_String_toSwift(value: String): NativePtr = value.objcPtr()
+
+@ExportedBridge("KotlinBridgeable_String_fromKotlin")
+public fun KotlinBridgeable_String_fromSwift(value: NativePtr): String = interpretObjCPointer<String>(value)
+
+@ExportedBridge("KotlinBridgeable_OptString_toKotlin")
+public fun KotlinBridgeable_OptString_toSwift(value: String?): NativePtr = when (value) {
+    null -> kotlin.native.internal.NativePtr.NULL
+    else -> KotlinBridgeable_String_toSwift(value)
+}
+
+@ExportedBridge("KotlinBridgeable_OptString_fromKotlin")
+public fun KotlinBridgeable_OptString_fromSwift(value: NativePtr): String? = when (value) {
+    kotlin.native.internal.NativePtr.NULL -> null
+    else -> KotlinBridgeable_String_fromSwift(value)
 }
