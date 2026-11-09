@@ -64,4 +64,4 @@ var IrCall.implicitInvoke: Boolean by irFlag(copyByDefault = false)
  */
 var IrFile.fileForTopLevelPluginDeclarations: Boolean by irFlag(copyByDefault = false)
 
-var IrModuleFragment.moduleVisibilityProvider: ModuleVisibilityProvider? by irAttribute(copyByDefault = false)
+var IrModuleFragment.moduleVisibilityProvider: ModuleVisibilityProvider? by irAttribute(copyByDefault = true)

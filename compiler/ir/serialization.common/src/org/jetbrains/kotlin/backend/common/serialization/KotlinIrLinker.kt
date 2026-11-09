@@ -503,9 +503,9 @@ fun interface DeserializationStrategyResolver {
  * compiled, fragments on backends that have no klibs at all (JVM), and the single fragment that the frontend creates
  * for all binary dependencies at once, see `DependencyListForCliModule.Builder`.
  */
-var IrModuleFragment.kotlinLibrary: KotlinLibrary? by irAttribute(copyByDefault = false)
+var IrModuleFragment.kotlinLibrary: KotlinLibrary? by irAttribute(copyByDefault = true)
 
-var IrModuleFragment.friendLibraries: Collection<KotlinLibrary>? by irAttribute(copyByDefault = false)
+var IrModuleFragment.friendLibraries: Collection<KotlinLibrary>? by irAttribute(copyByDefault = true)
 
 private object IrLinkerModuleVisibilityProvider : ModuleVisibilityProvider {
     override fun canSeeInternals(thisModule: IrModuleFragment, memberModule: IrModuleFragment): Boolean {
