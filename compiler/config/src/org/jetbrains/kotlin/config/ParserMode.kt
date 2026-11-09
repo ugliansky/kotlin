@@ -9,4 +9,8 @@ enum class ParserMode(val treeBased: Boolean) {
     Psi(treeBased = false),
     LightTree(treeBased = true),
     KmpTree(treeBased = true);
+
+    companion object {
+        val Default = LightTree
+    }
 }

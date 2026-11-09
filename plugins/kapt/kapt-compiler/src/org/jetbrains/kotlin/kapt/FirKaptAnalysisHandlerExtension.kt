@@ -78,7 +78,6 @@ open class FirKaptAnalysisHandlerExtension(
         if (options.mode.generateStubs) {
             val updatedConfiguration = configuration.copy().apply {
                 skipBodies = true
-                parserMode = ParserMode.LightTree // TODO: replace with `require(parserMode.treeBased)` once KT-86283 is fixed.
 
                 /*
                  * Later the KAPT pipeline registers extensions once again, so the extensions storage

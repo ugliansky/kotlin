@@ -154,7 +154,6 @@ fun serializeModuleToMetadata(
     val configuration = KotlinTestUtils.newConfiguration()
     configuration.put(CommonConfigurationKeys.MODULE_NAME, moduleName)
     configuration.allowKotlinPackage = true
-    configuration.parserMode = ParserMode.Psi // `TestPatchingFirVisitor` reads test directives from the PSI text of functions, KT-91411
 
     configuration.languageVersionSettings = LanguageVersionSettingsImpl(
         LanguageVersion.LATEST_STABLE, ApiVersion.LATEST_STABLE,
