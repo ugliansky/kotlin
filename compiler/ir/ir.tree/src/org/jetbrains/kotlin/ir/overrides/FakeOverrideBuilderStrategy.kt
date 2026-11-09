@@ -89,7 +89,7 @@ abstract class FakeOverrideBuilderStrategy {
 
     protected abstract fun shouldSeeInternals(thisModule: ModuleDescriptor, memberModule: ModuleDescriptor): Boolean
 
-    private fun isVisibleForOverrideInClass(original: IrOverridableMember, clazz: IrClass) : Boolean {
+    fun isVisibleForOverrideInClass(original: IrOverridableMember, clazz: IrClass) : Boolean {
         return when {
             DescriptorVisibilities.isPrivate(original.visibility) -> false
             original.visibility == DescriptorVisibilities.INVISIBLE_FAKE -> false

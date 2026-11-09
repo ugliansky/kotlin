@@ -50,8 +50,9 @@ class IrFakeOverrideBuilder(
                     }
                     // Filter out private setters (KT-91399)
                     this.setter?.takeUnless { DescriptorVisibilities.isPrivate(it.visibility) }?.let { setter ->
+                        val clazz = this.parent as? IrClass ?: error("Unexpected property parent: ${this.parent.render()}")
                         setter.overriddenSymbols = overriddenProperties.memoryOptimizedMapNotNull {
-                            it.owner.setter?.takeUnless { setter -> DescriptorVisibilities.isPrivate(setter.visibility) }?.symbol
+                            it.owner.setter?.takeIf { setter -> strategy.isVisibleForOverrideInClass(setter, clazz) }?.symbol
                         }
                     }
                     this.overriddenSymbols = overriddenProperties
