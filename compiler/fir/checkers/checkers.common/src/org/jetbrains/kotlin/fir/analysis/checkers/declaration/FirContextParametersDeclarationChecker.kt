@@ -19,7 +19,7 @@ import org.jetbrains.kotlin.fir.declarations.utils.isOperator
 import org.jetbrains.kotlin.fir.declarations.utils.nameOrSpecialName
 import org.jetbrains.kotlin.fir.isEnabled
 import org.jetbrains.kotlin.fir.symbols.impl.FirLocalPropertySymbol
-import org.jetbrains.kotlin.fir.syntax.syntaxComponent
+import org.jetbrains.kotlin.fir.syntax.withSyntax
 import org.jetbrains.kotlin.resolve.allowedInContextParameters
 import org.jetbrains.kotlin.util.OperatorNameConventions
 
@@ -28,13 +28,11 @@ object FirContextParametersDeclarationChecker : FirBasicDeclarationChecker(MppCh
     override fun check(declaration: FirDeclaration) {
         if (declaration.source?.kind is KtFakeSourceElementKind) return
 
-        val contextListSources = when (declaration) {
-            is FirFile -> declaration.packageDirective.source
-            else -> declaration.source
-        }?.let {
-            with(context.session.syntaxComponent) {
-                it.findContextParameterListSources()
-            }
+        val contextListSources = withSyntax {
+            when (declaration) {
+                is FirFile -> declaration.packageDirective.source
+                else -> declaration.source
+            }?.findContextParameterListSources()
         }.orEmpty().ifEmpty { return }
 
         val source = contextListSources.first()
@@ -115,4 +113,3 @@ object FirContextParametersDeclarationChecker : FirBasicDeclarationChecker(MppCh
         }
     }
 }
-

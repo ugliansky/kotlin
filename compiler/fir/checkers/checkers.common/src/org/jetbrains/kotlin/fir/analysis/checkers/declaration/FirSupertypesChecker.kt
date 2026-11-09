@@ -29,7 +29,7 @@ import org.jetbrains.kotlin.fir.resolve.toSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirClassifierSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirRegularClassSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirTypeAliasSymbol
-import org.jetbrains.kotlin.fir.syntax.syntaxComponent
+import org.jetbrains.kotlin.fir.syntax.withSyntax
 import org.jetbrains.kotlin.fir.types.*
 import org.jetbrains.kotlin.name.StandardClassIds
 
@@ -191,9 +191,7 @@ object FirSupertypesChecker : FirClassChecker(MppCheckerKind.Platform) {
         if (delegatedTypeRef !is FirFunctionTypeRef) return
         for (parameter in delegatedTypeRef.parameters) {
             val name = parameter.name ?: continue
-            val source = with(context.session.syntaxComponent) {
-                parameter.source.findParameterNameSource(name)
-            } ?: continue
+            val source = withSyntax { parameter.source.findParameterNameSource(name) } ?: continue
             reporter.reportOn(
                 source,
                 FirErrors.UNSUPPORTED,

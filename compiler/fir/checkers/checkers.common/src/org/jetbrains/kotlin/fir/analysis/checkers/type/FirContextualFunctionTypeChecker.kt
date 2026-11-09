@@ -14,7 +14,7 @@ import org.jetbrains.kotlin.fir.analysis.checkers.context.CheckerContext
 import org.jetbrains.kotlin.fir.analysis.checkers.requireFeatureSupport
 import org.jetbrains.kotlin.fir.analysis.diagnostics.FirErrors
 import org.jetbrains.kotlin.fir.analysis.forEachChildOfType
-import org.jetbrains.kotlin.fir.syntax.syntaxComponent
+import org.jetbrains.kotlin.fir.syntax.withSyntax
 import org.jetbrains.kotlin.fir.types.FirResolvedTypeRef
 import org.jetbrains.kotlin.fir.types.abbreviatedTypeOrSelf
 import org.jetbrains.kotlin.fir.types.hasContextParameters
@@ -27,13 +27,10 @@ object FirContextualFunctionTypeChecker : FirResolvedTypeRefChecker(MppCheckerKi
         if (typeRef.source?.kind is KtFakeSourceElementKind) return
         if (!typeRef.coneType.abbreviatedTypeOrSelf.hasContextParameters) return
 
-        val source = typeRef.source?.let {
-            with(context.session.syntaxComponent) {
-                it.findFunctionTypeContextParameterListSource()
+        val source = withSyntax { typeRef.source?.findFunctionTypeContextParameterListSource() }
+            ?: errorWithAttachment("Source for type ref of contextual function type doesn't contain context list.") {
+                withFirEntry("fir", typeRef)
             }
-        } ?: errorWithAttachment("Source for type ref of contextual function type doesn't contain context list.") {
-            withFirEntry("fir", typeRef)
-        }
 
         source.forEachChildOfType(valueParameterElementSet, depth = 1) {
             reporter.reportOn(it, FirErrors.NAMED_CONTEXT_PARAMETER_IN_FUNCTION_TYPE)

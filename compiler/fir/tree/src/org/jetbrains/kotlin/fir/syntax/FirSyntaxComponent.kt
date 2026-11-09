@@ -10,6 +10,7 @@ import org.jetbrains.kotlin.config.ParserMode
 import org.jetbrains.kotlin.fir.FirSession
 import org.jetbrains.kotlin.fir.FirSessionComponent
 import org.jetbrains.kotlin.fir.NoMutableState
+import org.jetbrains.kotlin.fir.SessionHolder
 import org.jetbrains.kotlin.fir.utils.exceptions.withSourceEntry
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.utils.exceptions.errorWithAttachment
@@ -21,9 +22,6 @@ import org.jetbrains.kotlin.utils.exceptions.errorWithAttachment
  * used for the session's sources.
  * The implementation is registered only for source sessions (in the CLI, it's selected by [org.jetbrains.kotlin.config.parserMode]);
  * the Analysis API always uses the PSI-based implementation.
- *
- * The API of this class must not expose IntelliJ platform types,
- * since the [ParserMode.KmpTree]-based implementation is intended to be free of the IntelliJ platform dependency.
  */
 @NoMutableState
 abstract class FirSyntaxComponent<T> : FirSessionComponent {
@@ -59,3 +57,6 @@ abstract class FirSyntaxComponent<T> : FirSessionComponent {
 }
 
 val FirSession.syntaxComponent: FirSyntaxComponent<*> by FirSession.Companion.sessionComponentAccessor()
+
+context(sessionHolder: SessionHolder)
+inline fun <R> withSyntax(block: FirSyntaxComponent<*>.() -> R): R = sessionHolder.session.syntaxComponent.block()

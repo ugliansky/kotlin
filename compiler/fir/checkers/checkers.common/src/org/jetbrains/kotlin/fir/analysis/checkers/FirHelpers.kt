@@ -42,7 +42,7 @@ import org.jetbrains.kotlin.fir.symbols.SymbolInternals
 import org.jetbrains.kotlin.fir.symbols.impl.*
 import org.jetbrains.kotlin.fir.symbols.lazyResolveToPhase
 import org.jetbrains.kotlin.fir.symbols.resolvedControlFlowGraphReference
-import org.jetbrains.kotlin.fir.syntax.syntaxComponent
+import org.jetbrains.kotlin.fir.syntax.withSyntax
 import org.jetbrains.kotlin.fir.types.*
 import org.jetbrains.kotlin.fir.visitors.FirVisitorVoid
 import org.jetbrains.kotlin.lexer.KtTokens.VAL_VAR
@@ -839,7 +839,7 @@ fun FirQualifiedAccessExpression.explicitReceiverIsNotSuperReference(): Boolean 
 
 context(context: CheckerContext)
 internal val KtSourceElement.defaultValueForParameter: KtSourceElement?
-    get() = with(context.session.syntaxComponent) { findDefaultValueSource() }
+    get() = withSyntax { findDefaultValueSource() }
 
 context(context: CheckerContext)
 @OptIn(ScopeFunctionRequiresPrewarm::class)

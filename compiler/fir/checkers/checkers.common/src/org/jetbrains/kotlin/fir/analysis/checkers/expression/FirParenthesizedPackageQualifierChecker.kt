@@ -23,8 +23,8 @@ import org.jetbrains.kotlin.fir.expressions.FirQualifiedAccessExpression
 import org.jetbrains.kotlin.fir.expressions.FirResolvedQualifier
 import org.jetbrains.kotlin.fir.isEnabled
 import org.jetbrains.kotlin.fir.resolve.diagnostics.ConeTypeArgumentsForOuterClass
+import org.jetbrains.kotlin.fir.syntax.withSyntax
 import org.jetbrains.kotlin.psi.psiUtil.UNWRAPPABLE_TOKEN_TYPES
-import org.jetbrains.kotlin.fir.syntax.syntaxComponent
 import org.jetbrains.kotlin.resolve.source.hasUnwrappableAsExplicitReceiver
 
 object FirParenthesizedPackageQualifierChecker : FirResolvedQualifierChecker(MppCheckerKind.Common) {
@@ -111,9 +111,7 @@ object FirParenthesizedPackageQualifierChecker : FirResolvedQualifierChecker(Mpp
                         reportParenthesizedPackageQualifier(source, onReceiver = true)
                         return
                     }
-                    val packageReceiverSource = with(context.session.syntaxComponent) {
-                        source.findExplicitReceiverOfDotQualifiedSource()
-                    }
+                    val packageReceiverSource = withSyntax { source.findExplicitReceiverOfDotQualifiedSource() }
                     packageReceiverSource?.let {
                         checkNestedPackages(it)
                     }

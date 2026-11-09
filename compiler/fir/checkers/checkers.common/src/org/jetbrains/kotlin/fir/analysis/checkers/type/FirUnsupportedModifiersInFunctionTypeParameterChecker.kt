@@ -14,7 +14,7 @@ import org.jetbrains.kotlin.fir.analysis.checkers.FirModifierList
 import org.jetbrains.kotlin.fir.analysis.checkers.context.CheckerContext
 import org.jetbrains.kotlin.fir.analysis.checkers.getModifierList
 import org.jetbrains.kotlin.fir.analysis.diagnostics.FirErrors
-import org.jetbrains.kotlin.fir.syntax.syntaxComponent
+import org.jetbrains.kotlin.fir.syntax.withSyntax
 import org.jetbrains.kotlin.psi.psiUtil.children
 import org.jetbrains.kotlin.util.getChildren
 
@@ -32,7 +32,7 @@ object FirUnsupportedModifiersInFunctionTypeParameterChecker : FirFunctionalType
 
     context(reporter: DiagnosticReporter, context: CheckerContext)
     private fun checkValOrVarKeyword(source: KtSourceElement) {
-        val keyword = with(context.session.syntaxComponent) { source.findValOrVarKeywordSource() } ?: return
+        val keyword = withSyntax { source.findValOrVarKeywordSource() } ?: return
 
         reporter.reportOn(
             keyword,
