@@ -42,6 +42,7 @@ import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImpl
 import org.jetbrains.kotlin.ir.declarations.impl.IrModuleFragmentImpl
 import org.jetbrains.kotlin.ir.expressions.IrSyntheticBodyKind
 import org.jetbrains.kotlin.ir.irFlag
+import org.jetbrains.kotlin.ir.moduleVisibilityProvider
 import org.jetbrains.kotlin.ir.symbols.*
 import org.jetbrains.kotlin.ir.symbols.impl.*
 import org.jetbrains.kotlin.ir.types.IrType
@@ -230,7 +231,9 @@ class Fir2IrDeclarationStorage(
     fun getDependenciesIrModule(moduleData: FirModuleData): IrModuleFragment {
         return irModuleCache.getOrPut(moduleData) {
             val moduleDescriptor = FirModuleDescriptor.createDependencyModuleDescriptor(moduleData, sourceModule.descriptor.builtIns)
-            IrModuleFragmentImpl(moduleDescriptor)
+            IrModuleFragmentImpl(moduleDescriptor).also {
+                it.moduleVisibilityProvider = Fir2IrModuleVisibilityProvider(sourceModule.descriptor)
+            }
         }
     }
 

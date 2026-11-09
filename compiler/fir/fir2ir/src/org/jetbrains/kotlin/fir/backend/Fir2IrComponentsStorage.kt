@@ -7,6 +7,7 @@ package org.jetbrains.kotlin.fir.backend
 
 import org.jetbrains.kotlin.backend.common.IrSpecialAnnotationsProvider
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns
+import org.jetbrains.kotlin.descriptors.ModuleDescriptor
 import org.jetbrains.kotlin.fir.FirSession
 import org.jetbrains.kotlin.fir.backend.Fir2IrCommonMemberStorage.DataValueClassGeneratedMembersInfo
 import org.jetbrains.kotlin.fir.backend.generators.*
@@ -17,8 +18,10 @@ import org.jetbrains.kotlin.ir.IrLock
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.declarations.impl.IrModuleFragmentImpl
+import org.jetbrains.kotlin.ir.moduleVisibilityProvider
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.util.KotlinMangler
+import org.jetbrains.kotlin.ir.util.ModuleVisibilityProvider
 import org.jetbrains.kotlin.ir.util.SymbolRemapper
 import org.jetbrains.kotlin.ir.util.moduleFragment
 import org.jetbrains.kotlin.utils.addToStdlib.runIf
@@ -45,7 +48,9 @@ class Fir2IrComponentsStorage(
 
     val module: IrModuleFragment = IrModuleFragmentImpl(
         FirModuleDescriptor.createSourceModuleDescriptor(session, kotlinBuiltIns)
-    )
+    ).also {
+        it.moduleVisibilityProvider = Fir2IrModuleVisibilityProvider(it.descriptor)
+    }
 
     private val conversionScope = Fir2IrConversionScope(configuration)
 
@@ -82,5 +87,39 @@ class Fir2IrComponentsStorage(
     @OptIn(UnsafeDuringIrConstructionAPI::class)
     override val specialAnnotationsProvider: IrSpecialAnnotationsProvider? by lazy {
         createSpecialAnnotationsProvider?.invoke(builtins.anyClass.owner.moduleFragment)
+    }
+}
+
+internal class Fir2IrModuleVisibilityProvider(
+    private val leafModuleDescriptor: ModuleDescriptor,
+) : ModuleVisibilityProvider {
+    override fun canSeeInternals(thisModule: IrModuleFragment, memberModule: IrModuleFragment): Boolean {
+        if (memberModule.moduleVisibilityProvider !is Fir2IrModuleVisibilityProvider) return false
+
+        val thisModuleDesc = thisModule.descriptor
+        val memberModuleDesc = memberModule.descriptor
+        require(thisModuleDesc is FirModuleDescriptor && memberModuleDesc is FirModuleDescriptor)
+        if (thisModuleDesc.shouldSeeInternalsOf(memberModuleDesc)) return true
+        /*
+         * There could be a case when one declaration is located in common sources and another is located in
+         * platform dependencies. For the frontend these two module data don't see each other, but from the
+         * backend point of view all sources belong to the same module. So in this situation we also should
+         * consider if the other declaration is visible from the leaf source module.
+         */
+
+        if (thisModuleDesc.session.kind == FirSession.Kind.Source && thisModuleDesc != leafModuleDescriptor) {
+            return leafModuleDescriptor.shouldSeeInternalsOf(memberModuleDesc)
+        }
+
+        /*
+         * This branch could be useful for the case with classpath substitution, if we would make a fake-override
+         * for a library class if it has a supertype from source. But at the moment of writing this code it's
+         * effectively unreachable, as fake overrides for library classes are built in the `Fir2IrLazyClass.declarations`
+         * which doesn't invoke this code. But it was decided to keep it for symmetry.
+         */
+        if (memberModuleDesc.session.kind == FirSession.Kind.Source && memberModuleDesc != leafModuleDescriptor) {
+            return thisModuleDesc.shouldSeeInternalsOf(leafModuleDescriptor)
+        }
+        return false
     }
 }

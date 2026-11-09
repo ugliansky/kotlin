@@ -292,11 +292,6 @@ private class IrLinkerFakeOverrideBuilderStrategy(
             getter = property.getter?.let { buildFunctionWithDisambiguatedSignature(it) }
             setter = property.setter?.let { buildFunctionWithDisambiguatedSignature(it) }
         }
-
-    // TODO(KT-62534) use ModuleDescriptor.shouldSeeInternalsOf when it's fixed and get rid of friendModules
-    override fun shouldSeeInternals(thisModule: IrModuleFragment, memberModule: IrModuleFragment): Boolean {
-        return thisModule == memberModule || thisModule.friendLibraries?.contains(memberModule.kotlinLibrary) ?: true
-    }
 }
 
 class IrLinkerFakeOverrideProvider(

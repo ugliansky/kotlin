@@ -23,6 +23,7 @@ import org.jetbrains.kotlin.fir.backend.Fir2IrCommonMemberStorage.DataValueClass
 import org.jetbrains.kotlin.fir.backend.generators.Fir2IrDataClassGeneratedMemberBodyGenerator
 import org.jetbrains.kotlin.fir.backend.utils.generatedBuiltinsDeclarationsFileName
 import org.jetbrains.kotlin.fir.declarations.FirFile
+import org.jetbrains.kotlin.fir.descriptors.FirModuleDescriptor
 import org.jetbrains.kotlin.fir.languageVersionSettings
 import org.jetbrains.kotlin.fir.lazy.Fir2IrLazyClass
 import org.jetbrains.kotlin.fir.moduleData
@@ -329,7 +330,6 @@ private class Fir2IrPipeline(
                 isGenericClashFromSameSupertypeAllowed = session.moduleData.platform.isJvm(),
                 isOverrideOfPublishedApiFromOtherModuleDisallowed = session.moduleData.platform.isJvm(),
                 delegatedMembersGenerationStrategy,
-                leafModuleDescriptor = componentsStorage.module.descriptor,
             ),
             componentsStorage.extensions.externalOverridabilityConditions
         ) to delegatedMembersGenerationStrategy

@@ -1146,10 +1146,6 @@ private object LoweringsFakeOverrideBuilderStrategy : FakeOverrideBuilderStrateg
     override fun postProcessGeneratedFakeOverride(fakeOverride: IrOverridableDeclaration<*>, clazz: IrClass) {
     }
 
-    // TODO(KT-62534) use ModuleDescriptor.shouldSeeInternalsOf when it's fixed
-    override fun shouldSeeInternals(thisModule: IrModuleFragment, memberModule: IrModuleFragment): Boolean {
-        return thisModule == memberModule
-    }
 }
 
 fun IrClass.addFakeOverrides(

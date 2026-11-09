@@ -11,6 +11,7 @@ import org.jetbrains.kotlin.backend.common.lower.RedundantCastsRemoverLowering
 import org.jetbrains.kotlin.backend.common.lower.inline.InlineCallCycleCheckerLowering
 import org.jetbrains.kotlin.backend.common.lower.optimizations.PropertyAccessorInlineLowering
 import org.jetbrains.kotlin.backend.common.phaser.*
+import org.jetbrains.kotlin.backend.common.serialization.IrLinkerModuleVisibilityProvider
 import org.jetbrains.kotlin.backend.common.serialization.friendLibraries
 import org.jetbrains.kotlin.backend.common.serialization.kotlinLibrary
 import org.jetbrains.kotlin.backend.konan.*
@@ -35,6 +36,7 @@ import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.declarations.impl.IrFileImpl
 import org.jetbrains.kotlin.ir.declarations.impl.IrModuleFragmentImpl
 import org.jetbrains.kotlin.ir.declarations.path
+import org.jetbrains.kotlin.ir.moduleVisibilityProvider
 import org.jetbrains.kotlin.ir.util.hasAnnotation
 import org.jetbrains.kotlin.konan.TempFiles
 import org.jetbrains.kotlin.konan.config.nomain
@@ -352,6 +354,7 @@ private fun PhaseEngine<out NativeBackendContext>.splitIntoFragments(
             val fragment = IrModuleFragmentImpl(input.descriptor)
             fragment.kotlinLibrary = input.kotlinLibrary
             fragment.friendLibraries = input.friendLibraries
+            fragment.moduleVisibilityProvider = input.moduleVisibilityProvider
             fragment.files += file
             if (containsStdlib && cacheDeserializationStrategy.containsKFunctionImpl)
                 fragment.files += files.filter { it.isFunctionInterfaceFile }

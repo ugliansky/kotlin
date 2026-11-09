@@ -21,11 +21,13 @@ import org.jetbrains.kotlin.ir.declarations.IrFile
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.declarations.impl.IrModuleFragmentImpl
 import org.jetbrains.kotlin.ir.irAttribute
+import org.jetbrains.kotlin.ir.moduleVisibilityProvider
 import org.jetbrains.kotlin.ir.symbols.*
 import org.jetbrains.kotlin.ir.types.IrTypeSystemContext
 import org.jetbrains.kotlin.ir.types.IrTypeSystemContextImpl
 import org.jetbrains.kotlin.ir.util.IdSignature
 import org.jetbrains.kotlin.ir.util.KotlinMangler
+import org.jetbrains.kotlin.ir.util.ModuleVisibilityProvider
 import org.jetbrains.kotlin.ir.util.SymbolTable
 import org.jetbrains.kotlin.ir.util.toIdSignature
 import org.jetbrains.kotlin.library.KotlinLibrary
@@ -336,6 +338,7 @@ abstract class KotlinIrLinker(
         val moduleFragment = IrModuleFragmentImpl(moduleDescriptor)
         moduleFragment.kotlinLibrary = kotlinLibrary
         moduleFragment.friendLibraries = friendModules[kotlinLibrary]
+        moduleFragment.moduleVisibilityProvider = IrLinkerModuleVisibilityProvider
 
         val deserializer = maybeWrapWithBuiltIn(
             createModuleDeserializer(
@@ -503,3 +506,10 @@ fun interface DeserializationStrategyResolver {
 var IrModuleFragment.kotlinLibrary: KotlinLibrary? by irAttribute(copyByDefault = false)
 
 var IrModuleFragment.friendLibraries: Collection<KotlinLibrary>? by irAttribute(copyByDefault = false)
+
+private object IrLinkerModuleVisibilityProvider : ModuleVisibilityProvider {
+    override fun canSeeInternals(thisModule: IrModuleFragment, memberModule: IrModuleFragment): Boolean {
+        if (memberModule.moduleVisibilityProvider !is IrLinkerModuleVisibilityProvider) return false
+        return thisModule == memberModule || thisModule.friendLibraries?.contains(memberModule.kotlinLibrary) == true
+    }
+}
