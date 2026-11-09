@@ -1147,10 +1147,8 @@ private object LoweringsFakeOverrideBuilderStrategy : FakeOverrideBuilderStrateg
     }
 
     // TODO(KT-62534) use ModuleDescriptor.shouldSeeInternalsOf when it's fixed
-    override fun shouldSeeInternals(thisModule: ModuleDescriptor, memberModule: ModuleDescriptor): Boolean {
-        val fromModuleName = thisModule.name.asStringStripSpecialMarkers()
-        val toModuleName = memberModule.name.asStringStripSpecialMarkers()
-        return fromModuleName == toModuleName
+    override fun shouldSeeInternals(thisModule: IrModuleFragment, memberModule: IrModuleFragment): Boolean {
+        return thisModule == memberModule
     }
 }
 

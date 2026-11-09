@@ -32,7 +32,6 @@ import org.jetbrains.kotlin.library.KotlinLibrary
 import org.jetbrains.kotlin.library.isHeader
 import org.jetbrains.kotlin.library.isNativeStdlib
 import org.jetbrains.kotlin.library.metadata.*
-import org.jetbrains.kotlin.library.uniqueName
 import org.jetbrains.kotlin.resolve.CommonCompilerDeserializationConfiguration
 import org.jetbrains.kotlin.serialization.deserialization.DeserializationConfiguration
 import org.jetbrains.kotlin.utils.newHashMapWithExpectedSize
@@ -73,7 +72,7 @@ internal fun LinkKlibsContext.linkKlibs(
     val stdlibToCache = config.librariesToCache.keys.firstOrNull { it.isNativeStdlib }
     require(stdlibToCache == null || !config.cachedLibraries.isLibraryCached(stdlibToCache)) { "The cache for stdlib is already built" }
 
-    val irLinker = createIrLinker(moduleDescriptor)
+    val irLinker = createIrLinker()
 
     scheduleDependenciesForDeserialization(
             loadedKlibs = config.loadedKlibs,
@@ -145,7 +144,7 @@ internal fun LinkKlibsContext.linkKlibs(
     }
 }
 
-private fun LinkKlibsContext.createIrLinker(moduleDescriptor: ModuleDescriptor): KonanIrLinker {
+private fun LinkKlibsContext.createIrLinker(): KonanIrLinker {
     val symbolTable = symbolTable!!
 
     val deserializationConfiguration = CommonCompilerDeserializationConfiguration(config.configuration.languageVersionSettings)
@@ -154,12 +153,7 @@ private fun LinkKlibsContext.createIrLinker(moduleDescriptor: ModuleDescriptor):
             cachedLibraries = config.cachedLibraries,
     )
 
-    val friendModuleUniqueNames = config.loadedKlibs.friends.map { it.uniqueName }
-    val includedModuleUniqueNames = config.loadedKlibs.included.map { it.uniqueName }
-
-    val friendModulesMap: Map<String, List<String>> =
-            (listOf(moduleDescriptor.name.asStringStripSpecialMarkers()) + includedModuleUniqueNames).associateWith { friendModuleUniqueNames }
-
+    val friendModulesMap = config.loadedKlibs.included.associateWith { config.loadedKlibs.friends }
     val irDiagnosticReporter = KtDiagnosticReporterWithImplicitIrBasedContext(
             config.configuration.diagnosticsCollector,
             config.languageVersionSettings,
