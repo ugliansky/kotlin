@@ -214,10 +214,11 @@ private fun processCodeSnippet(
             }
 
             state == VisitorState.EXPECT_VARIABLE_VALUE && clang_isExpression(kind) != 0 -> {
-                if (evalResultOrNull == null) {
+                val type = typeConverter(clang_getCursorType(cursor))
+                if (evalResultOrNull == null && type.canonicalIsPointerToChar()) {
                     stringLiteralValueOrNull = clang_Cursor_getStringLiteralValue(cursor).convertAndDispose()
                 }
-                typeOrNull = typeConverter(clang_getCursorType(cursor))
+                typeOrNull = type
                 state = VisitorState.EXPECT_END
                 CXChildVisitResult.CXChildVisit_Continue
             }
@@ -248,7 +249,7 @@ private fun processCodeSnippet(
         val type = typeOrNull!!
         return if (evalResultOrNull == null) {
             val stringLiteralValue = stringLiteralValueOrNull
-            if (stringLiteralValue != null && type.canonicalIsPointerToChar()) {
+            if (stringLiteralValue != null) {
                 StringConstantDef(name, type, stringLiteralValue)
             } else {
                 // The macro cannot be evaluated as a constant so we will wrap it in a bridge.
