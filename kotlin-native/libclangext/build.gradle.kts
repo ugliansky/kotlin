@@ -43,9 +43,6 @@ native {
     )
     if (PlatformInfo.isMac() || PlatformInfo.isLinux()) {
         cxxflags += "-DLIBCLANGEXT_ENABLE=1"
-    } else if (isWindows) {
-        // Clang AST headers emit debug helpers that depend on non-exported LLVM C++ symbols.
-        cxxflags += "-DNDEBUG"
     }
     suffixes {
         (".cpp" to ".$obj") {

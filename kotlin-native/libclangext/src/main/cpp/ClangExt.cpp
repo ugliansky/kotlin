@@ -50,6 +50,9 @@ static const Stmt *getCursorStmt(CXCursor cursor) {
   return static_cast<const Stmt *>(cursor.data[1]);
 }
 
+// For string macros, unwrap parentheses and implicit casts using inline
+// accessors. Calling Expr::IgnoreParenImpCasts() would pull in Clang's AST
+// libraries and their LLVM dependencies on Windows.
 static const Expr *unwrapParenImpCasts(const Expr *expression) {
   while (true) {
     if (const auto *implicitCast = dyn_cast<ImplicitCastExpr>(expression)) {
